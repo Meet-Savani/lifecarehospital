@@ -5,7 +5,6 @@ import AboutSection from "@/components/landing/AboutSection";
 import ServicesSection from "@/components/landing/ServicesSection";
 import DoctorsSection from "@/components/landing/DoctorsSection";
 import FacilitiesSection from "@/components/landing/FacilitiesSection";
-import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import FAQSection from "@/components/landing/FAQSection";
 import BlogSection from "@/components/landing/BlogSection";
 import ContactSection from "@/components/landing/ContactSection";
@@ -19,7 +18,6 @@ export default function Index() {
       <ServicesSection />
       <DoctorsSection />
       <FacilitiesSection />
-      <TestimonialsSection />
       <BlogSection />
       <FAQSection />
       <ContactSection />

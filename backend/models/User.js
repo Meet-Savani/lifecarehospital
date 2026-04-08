@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'doctor', 'patient'], default: 'patient' },
   phone: { type: String, default: '' },
+  age: { type: Number },
   avatarUrl: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

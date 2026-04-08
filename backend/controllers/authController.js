@@ -61,6 +61,7 @@ export const updateProfile = async (req, res) => {
     if (user) {
       user.fullName = fullName || user.fullName;
       user.phone = phone || user.phone;
+      if (req.body.age) user.age = req.body.age;
       const updatedUser = await user.save();
       res.json(updatedUser);
     } else {
@@ -75,6 +76,32 @@ export const getPatients = async (req, res) => {
   try {
     const patients = await User.find({ role: 'patient' }).select('-password');
     res.json(patients);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const adminUpdateUser = async (req, res) => {
+  try {
+    const { fullName, email, phone, role } = req.body;
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      fullName, email, phone, role
+    }, { new: true }).select('-password');
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

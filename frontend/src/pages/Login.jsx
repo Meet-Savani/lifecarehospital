@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Eye, EyeOff } from "lucide-react";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -33,32 +34,43 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 transition-colors duration-300 relative overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute top-0 -left-4 w-72 h-72 bg-primary/10 rounded-full blur-[100px] -z-10" />
+      <div className="absolute bottom-0 -right-4 w-72 h-72 bg-secondary/10 rounded-full blur-[100px] -z-10" />
+      
+      <div className="fixed top-8 right-8 z-50">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <Heart className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">LIOHNS</span>
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
+            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
+              <Heart className="h-7 w-7 text-white" />
+            </div>
+            <span className="text-3xl font-black text-foreground tracking-tighter uppercase">LIOHNS</span>
           </Link>
-          <h1 className="text-2xl font-bold text-foreground">Welcome Back</h1>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
+          <h1 className="text-3xl font-black text-foreground tracking-tight">Security Portal</h1>
+          <p className="text-sm font-bold text-muted-foreground mt-2 uppercase tracking-widest">Sign in to your clinical terminal</p>
         </div>
-        <form onSubmit={handleSubmit} className="bg-card p-8 rounded-2xl shadow-xl border border-border space-y-6 backdrop-blur-sm bg-card/95">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+
+        <form onSubmit={handleSubmit} className="bg-card p-10 rounded-[2.5rem] shadow-2xl border border-border space-y-8 backdrop-blur-xl transition-all duration-300">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Account Identifier</Label>
               <Input 
                 id="email" 
                 type="email" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
-                placeholder="your@email.com"
-                className="rounded-xl border-border bg-background/50 focus:ring-2 focus:ring-primary/20 transition-all"
+                placeholder="doctor@liohns.med"
+                className="h-14 rounded-2xl border-border bg-background focus:ring-4 focus:ring-primary/10 transition-all px-5 font-medium"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" name="password-label" className="text-sm font-medium">Password</Label>
+            <div className="space-y-3">
+              <Label htmlFor="password" name="password-label" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Encryption Key</Label>
               <div className="relative">
                 <Input 
                   id="password" 
@@ -67,29 +79,34 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
                   placeholder="••••••••"
-                  className="rounded-xl border-border bg-background/50 focus:ring-2 focus:ring-primary/20 transition-all pr-10"
+                  className="h-14 rounded-2xl border-border bg-background focus:ring-4 focus:ring-primary/10 transition-all pl-5 pr-12 font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
           </div>
-          <Button type="submit" className="w-full h-12 rounded-xl font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+
+          <Button type="submit" className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all duration-500 bg-primary hover:scale-[0.98]" disabled={loading}>
+            {loading ? "Decrypting..." : "Initialize Session"}
           </Button>
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary font-semibold hover:underline underline-offset-4">Create an account</Link>
+
+          <div className="text-center pt-4 border-t border-border/50">
+            <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+              New to the platform?{" "}
+              <Link to="/register" className="text-primary hover:underline hover:scale-105 inline-block transition-transform">Enlist Now</Link>
             </p>
-            <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Back to Home</Link>
           </div>
         </form>
+        
+        <div className="mt-10 text-center">
+            <Link to="/" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] hover:text-primary transition-colors">← Abort to Primary Index</Link>
+        </div>
       </div>
     </div>
   );

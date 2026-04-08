@@ -1,17 +1,22 @@
 import express from 'express';
-import { protect } from '../middleware/auth.js';
+import { protect, authorize } from '../middleware/auth.js';
+import upload from '../middleware/fileUpload.js';
 import {
   getOrCreateChat,
   getMessages,
   sendMessage,
-  getUserChats
+  getUserChats,
+  handleFileUpload,
+  getAllChats
 } from '../controllers/chatController.js';
 
 const router = express.Router();
 
+router.get('/admin/all', protect, authorize('admin'), getAllChats);
 router.get('/my-chats', protect, getUserChats);
 router.get('/:appointmentId', protect, getOrCreateChat);
 router.get('/messages/:chatId', protect, getMessages);
 router.post('/messages', protect, sendMessage);
+router.post('/upload', protect, upload.single('file'), handleFileUpload);
 
 export default router;

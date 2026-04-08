@@ -7,12 +7,17 @@ const appointmentSchema = new mongoose.Schema({
   time: { type: String, required: true },
   status: { 
     type: String, 
-    enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'], 
+    enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled', 'pending_reschedule'], 
     default: 'pending' 
   },
   notes: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
+
+appointmentSchema.index({ patientId: 1 });
+appointmentSchema.index({ doctorId: 1 });
+appointmentSchema.index({ date: 1 });
+appointmentSchema.index({ status: 1 });
 
 export default mongoose.model('Appointment', appointmentSchema);

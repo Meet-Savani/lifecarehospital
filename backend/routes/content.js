@@ -1,5 +1,5 @@
 import express from 'express';
-import { Service, Blog, Testimonial, FAQ } from '../models/Content.js';
+import { Service, Blog, FAQ } from '../models/Content.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -73,34 +73,6 @@ router.delete('/blogs/:id', protect, authorize('admin'), async (req, res) => {
   try {
     await Blog.findByIdAndDelete(req.params.id);
     res.json({ message: 'Blog deleted' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Testimonials
-router.get('/testimonials', async (req, res) => {
-  try {
-    const testimonials = await Testimonial.find().sort({ createdAt: -1 });
-    res.json(testimonials);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-router.post('/testimonials', async (req, res) => {
-  try {
-    const testimonial = await Testimonial.create(req.body);
-    res.status(201).json(testimonial);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-router.delete('/testimonials/:id', protect, authorize('admin'), async (req, res) => {
-  try {
-    await Testimonial.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Testimonial deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

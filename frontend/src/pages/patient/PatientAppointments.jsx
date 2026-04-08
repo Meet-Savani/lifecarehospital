@@ -11,6 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select as ShadSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  AlertDialog, AlertDialogAction, AlertDialogCancel, 
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter, 
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
 
 const isPastAppointment = (dateStr, timeStr) => {
   const timeMatch = timeStr?.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -78,6 +83,7 @@ export default function PatientAppointments() {
       case "rejected": return "bg-destructive/10 text-destructive border-destructive/20";
       case "completed": return "bg-primary/10 text-primary border-primary/20";
       case "cancelled": return "bg-muted text-muted-foreground border-border";
+      case "pending_reschedule": return "bg-orange-50 text-orange-600 border-orange-200";
       default: return "bg-warning/10 text-warning border-warning/20";
     }
   };
@@ -111,9 +117,9 @@ export default function PatientAppointments() {
                      <td className="p-3 text-foreground">{new Date(a.date).toLocaleDateString()}</td>
                      <td className="p-3 text-foreground">{a.time}</td>
                      <td className="p-3">
-                       <span className={`inline-block text-xs px-2 py-0.5 rounded-full border ${statusColor(a.status)}`}>
-                         {a.status}
-                       </span>
+                        <span className={`inline-block text-xs px-2 py-0.5 rounded-full border font-bold uppercase tracking-widest ${statusColor(a.status)}`}>
+                          {a.status === 'pending_reschedule' ? 'Pending Approval' : a.status}
+                        </span>
                      </td>
                      <td className="p-3">
                         <div className="flex gap-2">
@@ -129,9 +135,30 @@ export default function PatientAppointments() {
                               <Button size="sm" variant="outline" className="h-8 text-xs hover:bg-muted" onClick={() => setRescheduleData({ id: a._id, date: a.date.split("T")[0], time: a.time })}>
                                 Reschedule
                               </Button>
-                              <Button size="sm" variant="outline" className="h-8 text-xs text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => updateStatus.mutate({ id: a._id, status: "cancelled" })}>
-                                Cancel
-                              </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-8 text-xs text-destructive border-destructive/20 hover:bg-destructive/10">
+                                      Cancel
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="rounded-2xl border-none shadow-2xl">
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle className="text-xl font-bold">Cancel Appointment?</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-slate-500">
+                                        Are you sure you want to cancel your appointment with {a.doctorId?.userId?.fullName}? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter className="gap-2">
+                                      <AlertDialogCancel className="rounded-xl border-slate-200">No, keep it</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        className="rounded-xl bg-destructive hover:bg-destructive/90"
+                                        onClick={() => updateStatus.mutate({ id: a._id, status: "cancelled" })}
+                                      >
+                                        Yes, cancel it
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                           ) : a.status !== "approved" && (
                             <span className="text-xs text-muted-foreground font-medium">—</span>

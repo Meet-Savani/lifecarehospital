@@ -20,15 +20,6 @@ const blogSchema = new mongoose.Schema({
 
 export const Blog = mongoose.model('Blog', blogSchema);
 
-const testimonialSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  message: { type: String, required: true },
-  rating: { type: Number, default: 5 },
-  createdAt: { type: Date, default: Date.now }
-});
-
-export const Testimonial = mongoose.model('Testimonial', testimonialSchema);
-
 const faqSchema = new mongoose.Schema({
   question: { type: String, required: true },
   answer: { type: String, required: true },

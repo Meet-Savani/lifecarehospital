@@ -1,195 +1,395 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { socket } from '@/services/socket';
-import api from '@/services/api';
-import Navbar from '@/components/layout/Navbar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Send, ArrowLeft, MoreVertical, MessageSquare } from 'lucide-react';
-import { format } from 'date-fns';
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  Send, Image as ImageIcon, FileText, Video, 
+  Download, Maximize2, X, MoreVertical, User, 
+  Trash2, AlertCircle, Phone, Video as VideoIcon,
+  ChevronDown, File, Check, Loader2, MessageSquare
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { io } from "socket.io-client";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
+  DropdownMenuTrigger, DropdownMenuSeparator 
+} from "@/components/ui/dropdown-menu";
+import { 
+  Dialog, DialogContent, DialogHeader, 
+  DialogTitle, DialogTrigger 
+} from "@/components/ui/dialog";
+
+const socket = io(import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || "http://localhost:5000", {
+  transports: ["websocket"],
+  autoConnect: true
+});
 
 export default function ChatPage() {
   const { appointmentId } = useParams();
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [chat, setChat] = useState(null);
+  const [msg, setMsg] = useState("");
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [preview, setPreview] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState(null);
+  const scrollRef = useRef();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const { data: chat, isLoading: chatLoading } = useQuery({
+    queryKey: ["chat", appointmentId],
+    queryFn: async () => {
+      const response = await api.get(`/chat/${appointmentId}`);
+      return response.data;
+    },
+  });
+
+  const { data: initialMessages } = useQuery({
+    queryKey: ["messages", chat?._id],
+    queryFn: async () => {
+      const response = await api.get(`/chat/messages/${chat._id}`);
+      return response.data;
+    },
+    enabled: !!chat?._id,
+  });
 
   useEffect(() => {
-    const fetchChatAndMessages = async () => {
-      try {
-        const chatRes = await api.get(`/chat/${appointmentId}`);
-        setChat(chatRes.data);
-        
-        const msgRes = await api.get(`/chat/messages/${chatRes.data._id}`);
-        setMessages(msgRes.data);
-        setLoading(false);
-        
-        // Connect to socket and join room
-        socket.connect();
-        socket.emit('join_chat', chatRes.data._id);
-      } catch (error) {
-        console.error('Error fetching chat:', error);
-        setLoading(false);
-      }
+    if (initialMessages) setMessages(initialMessages);
+  }, [initialMessages]);
+
+  useEffect(() => {
+    if (!chat?._id) return;
+
+    socket.emit("join_chat", chat._id);
+
+    const onMessage = (newMsg) => {
+      setMessages((prev) => [...prev, newMsg]);
     };
 
-    if (appointmentId) {
-      fetchChatAndMessages();
-    }
-
+    socket.on("receive_message", onMessage);
     return () => {
-      socket.disconnect();
+      socket.off("receive_message", onMessage);
     };
-  }, [appointmentId]);
+  }, [chat?._id]);
 
   useEffect(() => {
-    socket.on('receive_message', (data) => {
-      if (data.chatId === chat?._id) {
-        setMessages((prev) => [...prev, data]);
-      }
-    });
-
-    socket.on('user_typing', ({ userId }) => {
-      if (userId !== user?._id) {
-        setIsTyping(true);
-        setTimeout(() => setIsTyping(false), 3000);
-      }
-    });
-
-    return () => {
-      socket.off('receive_message');
-      socket.off('user_typing');
-    };
-  }, [chat, user]);
-
-  useEffect(() => {
-    scrollToBottom();
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
+  const sendMsgMutation = useMutation({
+    mutationFn: async (payload) => {
+      const res = await api.post("/chat/messages", payload);
+      return res.data;
+    },
+    onSuccess: (newMsg) => {
+      socket.emit("send_message", { ...newMsg, chatId: chat._id });
+      setMessages((prev) => [...prev, newMsg]);
+      setMsg("");
+      setPreview(null);
+    },
+  });
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    const isPdf = file.type === 'application/pdf';
+
+    if (!isImage && !isVideo && !isPdf) {
+      toast({ title: "Unsupported File", description: "Only Images, PDFs and videos are allowed.", variant: "destructive" });
+      return;
+    }
+
+    setPreview({ name: file.name, type: isPdf ? 'pdf' : isVideo ? 'video' : 'image', loading: true });
 
     try {
-      const messageData = {
-        chatId: chat._id,
-        message: newMessage.trim(),
-        senderId: user._id,
-        createdAt: new Date().toISOString()
-      };
-
-      // Real-time update via socket
-      socket.emit('send_message', messageData);
-      
-      // Save to database
-      await api.post('/chat/messages', {
-        chatId: chat._id,
-        message: newMessage.trim()
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await api.post("/chat/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setNewMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
+      sendMsgMutation.mutate({
+        chatId: chat._id,
+        type: res.data.type,
+        fileUrl: res.data.url,
+        fileName: res.data.name,
+      });
+    } catch (err) {
+      toast({ title: "Upload Failed", description: "Could not send file.", variant: "destructive" });
+      setPreview(null);
     }
   };
 
-  const handleTyping = () => {
-    socket.emit('typing', { chatId: chat?._id, userId: user?._id });
+  const onSend = (e) => {
+    e.preventDefault();
+    if (!msg.trim() || !chat?._id) return;
+    sendMsgMutation.mutate({ chatId: chat._id, message: msg, type: "text" });
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading Chat...</div>;
+  const otherParticipant = chat?.participants?.find(p => p._id !== user?._id);
+
+  const downloadFile = (url, name) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name || "download";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const MessageBubble = ({ m }) => {
+    const isMe = m.senderId === user?._id;
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className={`flex ${isMe ? "justify-end" : "justify-start"} mb-6 relative group`}
+      >
+        <div className={`max-w-[85%] md:max-w-[70%] transition-colors duration-300 ${
+          isMe 
+            ? "bg-primary text-white rounded-t-[2rem] rounded-bl-[2rem] shadow-lg shadow-primary/10" 
+            : "bg-card text-foreground rounded-t-[2rem] rounded-br-[2rem] border border-border shadow-sm"
+        } p-5 relative`}>
+           <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-2 opacity-50 ${isMe ? "text-right" : "text-left"}`}>
+             {isMe ? "Sent by You" : `${otherParticipant?.fullName || "Recipient"}`}
+           </p>
+           
+           {m.type === "text" && <p className="text-sm md:text-base font-medium leading-relaxed">{m.message}</p>}
+           
+           {m.type === "image" && (
+             <div className="space-y-3">
+               <div className="relative rounded-2xl overflow-hidden cursor-zoom-in group/img border border-border/50" onClick={() => setSelectedMedia(m)}>
+                 <img src={m.fileUrl} alt="sent" className="w-full max-h-80 object-cover hover:scale-105 transition-transform duration-500" />
+                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                    <Maximize2 className="text-white w-8 h-8" />
+                 </div>
+               </div>
+               <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${isMe ? "bg-white/10 text-white hover:bg-white/20" : "bg-muted/50 text-foreground hover:bg-muted"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
+                 <Download className="w-4 h-4 mr-2" /> Download Image
+               </Button>
+             </div>
+           )}
+
+           {m.type === "video" && (
+             <div className="space-y-3 min-w-[300px]">
+               <video controls className="w-full rounded-2xl bg-black shadow-2xl">
+                 <source src={m.fileUrl} />
+               </video>
+               <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${isMe ? "bg-white/10 text-white hover:bg-white/20" : "bg-muted/50 text-foreground hover:bg-muted"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
+                 <Download className="w-4 h-4 mr-2" /> Download Video
+               </Button>
+             </div>
+           )}
+
+           {m.type === "pdf" && (
+             <div className={`flex flex-col gap-4 p-4 rounded-2xl border ${isMe ? "bg-white/10 border-white/20" : "bg-muted/30 border-border"}`}>
+               <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg">
+                   <FileText className="w-6 h-6" />
+                 </div>
+                 <div className="flex-1 min-w-0">
+                    <p className={`font-bold text-sm truncate ${isMe ? "text-white" : "text-foreground"}`}>{m.fileName || "document.pdf"}</p>
+                    <p className={`text-[10px] uppercase font-black tracking-widest ${isMe ? "text-white/60" : "text-muted-foreground"}`}>PDF Document</p>
+                 </div>
+               </div>
+               <div className="grid grid-cols-2 gap-2">
+                 <Dialog>
+                   <DialogTrigger asChild>
+                     <Button size="sm" variant="ghost" className={`rounded-xl h-10 text-xs font-bold gap-2 ${isMe ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted"}`}>
+                       <Maximize2 className="w-4 h-4" /> Open
+                     </Button>
+                   </DialogTrigger>
+                   <DialogContent className="max-w-4xl h-[90vh] rounded-[3rem] overflow-hidden p-0 border-none bg-background">
+                     <iframe src={`${m.fileUrl}#toolbar=0`} className="w-full h-full border-none" title="PDF Viewer" />
+                   </DialogContent>
+                 </Dialog>
+                 <Button size="sm" className="rounded-xl h-10 text-xs font-bold gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-none" onClick={() => downloadFile(m.fileUrl, m.fileName)}>
+                   <Download className="w-4 h-4" /> Save
+                 </Button>
+               </div>
+             </div>
+           )}
+           <span className={`text-[9px] font-black uppercase opacity-40 mt-3 block ${isMe ? "text-right" : "text-left"}`}>
+             {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+           </span>
+        </div>
+      </motion.div>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col h-screen overflow-hidden">
-      <Navbar />
-      
-      <div className="flex-1 container mx-auto px-4 py-6 max-w-4xl flex flex-col overflow-hidden">
+    <DashboardLayout role={user?.role}>
+      <div className="max-w-5xl mx-auto h-[calc(100vh-140px)] flex flex-col transition-all duration-300">
         {/* Chat Header */}
-        <div className="bg-white p-4 rounded-t-2xl border-b border-border shadow-sm flex items-center justify-between z-10">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <MessageSquare className="h-5 w-5 text-primary" />
+        <motion.header 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="bg-card border border-border rounded-t-[3rem] p-6 shadow-xl flex items-center justify-between transition-colors duration-300"
+        >
+          <div className="flex items-center gap-5">
+            <div className="relative">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-2xl">
+                 {otherParticipant?.fullName?.charAt(0)}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-card shadow-sm" />
             </div>
             <div>
-              <h2 className="font-bold text-foreground">Doctor Consultation Chat</h2>
-              <p className="text-xs text-muted-foreground">
-                {isTyping ? 'Typing...' : 'Always secure and confidential'}
+              <h2 className="text-xl font-black text-foreground leading-tight tracking-tight">{otherParticipant?.fullName || "Syncing..."}</h2>
+              <p className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 mt-1 tracking-widest">
+                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Secure Healthline
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <MoreVertical className="h-5 w-5" />
-          </Button>
-        </div>
+          <div className="flex items-center gap-3">
+             <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-muted text-muted-foreground transition-all">
+                <Phone className="w-5 h-5" />
+             </Button>
+             <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-muted text-muted-foreground transition-all">
+                <VideoIcon className="w-5 h-5" />
+             </Button>
+             
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-muted text-muted-foreground transition-all">
+                      <MoreVertical className="w-5 h-5" />
+                   </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 p-2 rounded-3xl shadow-2xl border border-border bg-card mt-2 mr-2">
+                   <DropdownMenuItem className="rounded-2xl h-12 px-4 gap-3 cursor-pointer font-bold">
+                      <User className="w-4 h-4 text-muted-foreground" /> Member Profile
+                   </DropdownMenuItem>
+                   <DropdownMenuItem className="rounded-2xl h-12 px-4 gap-3 cursor-pointer font-bold">
+                      <Download className="w-4 h-4 text-muted-foreground" /> Media Archive
+                   </DropdownMenuItem>
+                   <DropdownMenuSeparator className="my-2" />
+                   <DropdownMenuItem className="rounded-2xl h-12 px-4 gap-3 cursor-pointer text-destructive hover:bg-destructive/10 font-black uppercase text-[10px] tracking-widest">
+                      <Trash2 className="w-4 h-4" /> Clear Discussion
+                   </DropdownMenuItem>
+                </DropdownMenuContent>
+             </DropdownMenu>
+          </div>
+        </motion.header>
 
-        {/* Messages Layout */}
-        <div className="flex-1 bg-white p-6 overflow-y-auto space-y-4 border-l border-r border-border scrollbar-hide">
-          {messages.length === 0 && (
-            <div className="text-center py-20 opacity-50">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="h-8 w-8" />
-              </div>
-              <p className="text-sm">No messages yet. Send a message to start the conversation.</p>
-            </div>
-          )}
-          
-          {messages.map((msg, index) => {
-            const isMe = msg.senderId === user?._id;
-            return (
-              <div key={index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] group`}>
-                  <div className={`p-4 rounded-2xl text-sm shadow-sm relative ${
-                    isMe 
-                      ? 'bg-primary text-white rounded-tr-sm' 
-                      : 'bg-slate-100 text-slate-800 rounded-tl-sm'
-                  }`}>
-                    {msg.message}
-                    <p className={`text-[10px] mt-1 opacity-70 flex justify-end`}>
-                      {format(new Date(msg.createdAt), 'hh:mm a')}
-                    </p>
-                  </div>
+        {/* Chat Body */}
+        <div className="flex-1 bg-muted/20 border-x border-border overflow-y-auto p-6 md:p-10 custom-scrollbar transition-colors duration-300">
+          <AnimatePresence>
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center px-10">
+                <div className="w-24 h-24 bg-card rounded-[2.5rem] shadow-2xl flex items-center justify-center mb-6 border border-border">
+                   <MessageSquare className="w-10 h-10 text-muted-foreground/20" />
                 </div>
+                <h3 className="text-xl font-black text-foreground tracking-tight">Clinical Gateway Ready</h3>
+                <p className="text-muted-foreground text-sm mt-3 font-medium max-w-xs leading-relaxed italic">
+                  Private communication initialized. All interactions are securely logged in clinical history.
+                </p>
               </div>
-            );
-          })}
-          <div ref={messagesEndRef} />
+            ) : (
+              messages.map((m, i) => <MessageBubble key={m._id || i} m={m} />)
+            )}
+            <div ref={scrollRef} />
+          </AnimatePresence>
         </div>
 
-        {/* Input Area */}
-        <div className="bg-white p-4 rounded-b-2xl border-t border-border shadow-sm">
-          <form onSubmit={handleSendMessage} className="flex gap-3">
-            <Input
-              value={newMessage}
-              onChange={(e) => {
-                setNewMessage(e.target.value);
-                handleTyping();
-              }}
-              placeholder="Type your message here..."
-              className="rounded-xl bg-slate-50 border-none focus-visible:ring-1 focus-visible:ring-primary/20 h-12"
-            />
-            <Button 
-              type="submit" 
-              className="rounded-xl h-12 w-12 p-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all"
-              disabled={!newMessage.trim()}
+        {/* Input Footer */}
+        <footer className="bg-card border border-border rounded-b-[3rem] p-6 shadow-2xl transition-colors duration-300">
+          {preview && (
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="mb-6 p-4 bg-muted/50 rounded-2xl flex items-center justify-between border border-dashed border-border"
             >
-              <Send className="h-5 w-5" />
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-card rounded-xl flex items-center justify-center text-primary shadow-sm border border-border">
+                    {preview.loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 
+                     preview.type === 'pdf' ? <FileText className="w-6 h-6 text-red-500" /> : 
+                     preview.type === 'video' ? <Video className="w-6 h-6 text-blue-500" /> : 
+                     <ImageIcon className="w-6 h-6" />}
+                 </div>
+                 <div>
+                    <p className="text-sm font-black text-foreground truncate max-w-[200px]">{preview.name}</p>
+                    <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">
+                      {preview.loading ? "Enciphering Payload..." : "Ready for Transmission"}
+                    </p>
+                 </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setPreview(null)} className="rounded-full">
+                 <X className="w-5 h-5 text-muted-foreground" />
+              </Button>
+            </motion.div>
+          )}
+
+          <form onSubmit={onSend} className="flex items-center gap-4">
+            <div className="flex gap-2">
+              <label className="cursor-pointer group">
+                <Input type="file" className="hidden" onChange={handleFileUpload} accept="image/*,video/*,application/pdf" />
+                <div className="w-14 h-14 bg-muted/50 rounded-2xl flex items-center justify-center text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all border border-transparent hover:border-primary/20">
+                   <ImageIcon className="w-6 h-6" />
+                </div>
+              </label>
+            </div>
+            <div className="flex-1 relative">
+              <Input 
+                value={msg} 
+                onChange={(e) => setMsg(e.target.value)}
+                placeholder="Synchronize clinical notes..." 
+                className="h-14 rounded-2xl border-border bg-muted/30 pl-6 pr-4 font-bold text-foreground focus:ring-primary/20 focus:bg-card transition-all"
+              />
+            </div>
+            <Button type="submit" size="icon" className="w-14 h-14 rounded-[1.25rem] bg-primary text-white shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all disabled:opacity-30" disabled={!msg.trim() && !preview}>
+               <Send className="w-6 h-6" />
             </Button>
           </form>
-        </div>
+        </footer>
+
+        {/* Lightbox / Media Preview */}
+        <AnimatePresence>
+          {selectedMedia && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center p-6"
+            >
+              <button className="absolute top-10 right-10 text-white/30 hover:text-white transition-all transform hover:rotate-90 duration-500" onClick={() => setSelectedMedia(null)}>
+                <X className="w-14 h-14" />
+              </button>
+              
+              <div className="max-w-7xl w-full h-full flex flex-col items-center justify-center gap-10">
+                 <motion.div
+                  initial={{ scale: 0.9, y: 30 }}
+                  animate={{ scale: 1, y: 0 }}
+                  className="relative group"
+                 >
+                    <img 
+                      src={selectedMedia.fileUrl} 
+                      className="max-h-[75vh] w-auto rounded-[3.5rem] shadow-2xl border-[12px] border-white/5"
+                    />
+                 </motion.div>
+                 <div className="flex flex-col md:flex-row items-center gap-8 bg-white/5 backdrop-blur-md p-8 rounded-[3rem] border border-white/10">
+                    <div className="text-center md:text-left">
+                       <p className="text-white font-black text-3xl tracking-tighter uppercase">{selectedMedia.fileName || "clinical_attachment.jpg"}</p>
+                       <p className="text-white/40 text-xs font-black mt-2 tracking-[0.3em] uppercase">Secured Archive Disclosure</p>
+                    </div>
+                    <Button 
+                      onClick={() => downloadFile(selectedMedia.fileUrl, selectedMedia.fileName)}
+                      className="h-16 px-12 rounded-3xl bg-white text-slate-900 hover:bg-primary hover:text-white transition-all duration-500 font-extrabold gap-4 shadow-2xl text-lg"
+                    >
+                      <Download className="w-6 h-6" /> LOCAL SAVE
+                    </Button>
+                 </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

@@ -12,13 +12,25 @@ export const getOrCreateChat = async (req, res) => {
     if (appointment.status !== 'approved') return res.status(403).json({ message: 'Chat is only enabled for approved appointments' });
 
     // Check if chat already exists
-    let chat = await Chat.findOne({ appointmentId });
+    let chat = await Chat.findOne({ appointmentId })
+      .populate('participants', 'fullName email role')
+      .populate({
+        path: 'appointmentId',
+        populate: { path: 'doctorId', populate: { path: 'userId', select: 'fullName' } }
+      });
+
     if (!chat) {
       // Create new chat
       chat = await Chat.create({
         appointmentId,
         participants: [appointment.patientId, appointment.doctorId.userId]
       });
+      chat = await Chat.findById(chat._id)
+        .populate('participants', 'fullName email role')
+        .populate({
+          path: 'appointmentId',
+          populate: { path: 'doctorId', populate: { path: 'userId', select: 'fullName' } }
+        });
     }
 
     res.json(chat);
@@ -37,14 +49,34 @@ export const getMessages = async (req, res) => {
   }
 };
 
+export const getAllChats = async (req, res) => {
+  try {
+    const chats = await Chat.find()
+      .populate('participants', 'fullName email role')
+      .populate({
+        path: 'appointmentId',
+        populate: [
+          { path: 'patientId', select: 'fullName' },
+          { path: 'doctorId', populate: { path: 'userId', select: 'fullName' } }
+        ]
+      })
+      .sort({ updatedAt: -1 });
+    res.json(chats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const sendMessage = async (req, res) => {
   try {
-    const { chatId, message, type } = req.body;
+    const { chatId, message, type, fileUrl, fileName } = req.body;
     const newMessage = await Message.create({
       chatId,
       senderId: req.user._id,
       message,
-      type: type || 'text'
+      type: type || 'text',
+      fileUrl,
+      fileName
     });
 
     // Update last message in chat
@@ -70,6 +102,24 @@ export const getUserChats = async (req, res) => {
       })
       .sort({ updatedAt: -1 });
     res.json(chats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const handleFileUpload = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    
+    // Cloudinary returns the URL in path or secure_url depending on setup
+    // With multer-storage-cloudinary, it's usually in req.file.path
+    res.json({
+      url: req.file.path,
+      name: req.file.originalname,
+      type: req.file.mimetype.split('/')[0] === 'application' ? 'pdf' : req.file.mimetype.split('/')[0]
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

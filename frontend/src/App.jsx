@@ -18,17 +18,23 @@ import BookAppointment from "./pages/patient/BookAppointment";
 import PatientAppointments from "./pages/patient/PatientAppointments";
 import PatientChat from "./pages/patient/PatientChat";
 import PatientProfile from "./pages/patient/PatientProfile";
+import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminDoctors from "./pages/admin/AdminDoctors";
 import AdminAppointments from "./pages/admin/AdminAppointments";
 import AdminPatients from "./pages/admin/AdminPatients";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminBlogs from "./pages/admin/AdminBlogs";
-import AdminTestimonials from "./pages/admin/AdminTestimonials";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminFAQ from "./pages/admin/AdminFAQ";
+import AdminChats from "./pages/admin/AdminChats";
+import ConsultationChats from "./pages/ConsultationChats";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import DoctorProfile from "./pages/doctor/DoctorProfile";
+import DoctorPrescriptions from "./pages/doctor/DoctorPrescriptions";
+import DoctorUnavailability from "./pages/doctor/DoctorUnavailability";
+import PatientHistory from "./pages/doctor/PatientHistory";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, role, loading } = useAuth();
@@ -47,6 +53,7 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
 
       <Route path="/patient" element={<ProtectedRoute allowedRoles={["patient"]}><PatientDashboard /></ProtectedRoute>} />
+      <Route path="/patient/prescriptions" element={<ProtectedRoute allowedRoles={["patient"]}><PatientPrescriptions /></ProtectedRoute>} />
       <Route path="/patient/book" element={<ProtectedRoute allowedRoles={["patient"]}><BookAppointment /></ProtectedRoute>} />
       <Route path="/patient/appointments" element={<ProtectedRoute allowedRoles={["patient"]}><PatientAppointments /></ProtectedRoute>} />
       <Route path="/patient/chat" element={<ProtectedRoute allowedRoles={["patient"]}><PatientChat /></ProtectedRoute>} />
@@ -58,14 +65,19 @@ function AppRoutes() {
       <Route path="/admin/patients" element={<ProtectedRoute allowedRoles={["admin"]}><AdminPatients /></ProtectedRoute>} />
       <Route path="/admin/services" element={<ProtectedRoute allowedRoles={["admin"]}><AdminServices /></ProtectedRoute>} />
       <Route path="/admin/blogs" element={<ProtectedRoute allowedRoles={["admin"]}><AdminBlogs /></ProtectedRoute>} />
-      <Route path="/admin/testimonials" element={<ProtectedRoute allowedRoles={["admin"]}><AdminTestimonials /></ProtectedRoute>} />
+      <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={["admin"]}><AdminAnalytics /></ProtectedRoute>} />
       <Route path="/admin/faq" element={<ProtectedRoute allowedRoles={["admin"]}><AdminFAQ /></ProtectedRoute>} />
+      <Route path="/admin/chats" element={<ProtectedRoute allowedRoles={["admin"]}><AdminChats /></ProtectedRoute>} />
+      <Route path="/chats" element={<ProtectedRoute allowedRoles={["patient", "doctor"]}><ConsultationChats /></ProtectedRoute>} />
 
       <Route path="/doctor" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorDashboard /></ProtectedRoute>} />
       <Route path="/doctor/appointments" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorAppointments /></ProtectedRoute>} />
       <Route path="/doctor/profile" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorProfile /></ProtectedRoute>} />
+      <Route path="/doctor/prescriptions" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorPrescriptions /></ProtectedRoute>} />
+      <Route path="/doctor/unavailability" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorUnavailability /></ProtectedRoute>} />
+      <Route path="/doctor/history" element={<ProtectedRoute allowedRoles={["doctor"]}><PatientHistory /></ProtectedRoute>} />
       
-      <Route path="/chat/:appointmentId" element={<ProtectedRoute allowedRoles={["patient", "doctor"]}><ChatPage /></ProtectedRoute>} />
+      <Route path="/chat/:appointmentId" element={<ProtectedRoute allowedRoles={["patient", "doctor", "admin"]}><ChatPage /></ProtectedRoute>} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

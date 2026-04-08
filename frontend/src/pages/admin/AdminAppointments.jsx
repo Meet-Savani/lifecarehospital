@@ -36,6 +36,7 @@ export default function AdminAppointments() {
             <thead className="bg-muted">
               <tr>
                 <th className="text-left p-3 font-medium text-muted-foreground">Doctor</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">Patient</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Time</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Status</th>
@@ -46,6 +47,7 @@ export default function AdminAppointments() {
               {appointments?.map((a) => (
                 <tr key={a._id}>
                   <td className="p-3 font-medium text-foreground">{a.doctorId?.userId?.fullName || "Doctor"}</td>
+                  <td className="p-3 font-medium text-foreground">{a.patientId?.fullName || "Patient"}</td>
                   <td className="p-3 text-foreground">{new Date(a.date).toLocaleDateString()}</td>
                   <td className="p-3 text-foreground">{a.time}</td>
                   <td className="p-3">

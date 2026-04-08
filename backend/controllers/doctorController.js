@@ -1,5 +1,6 @@
 import Doctor from '../models/Doctor.js';
 import User from '../models/User.js';
+import Unavailability from '../models/Unavailability.js';
 
 export const getDoctors = async (req, res) => {
   try {
@@ -52,15 +53,17 @@ export const getDoctorMe = async (req, res) => {
 export const updateDoctor = async (req, res) => {
   try {
     const doctorId = req.params.id;
-    const { fullName, specialization, experience, bio, profileImage } = req.body;
+    const { fullName, specialization, experience, bio, profileImage, consultationFee, unavailableSlots } = req.body;
     
     const doctor = await Doctor.findById(doctorId).populate('userId');
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
 
-    doctor.specialization = specialization;
-    doctor.experience = experience;
-    doctor.bio = bio;
-    doctor.profileImage = profileImage;
+    if (specialization) doctor.specialization = specialization;
+    if (experience !== undefined) doctor.experience = experience;
+    if (bio) doctor.bio = bio;
+    if (profileImage) doctor.profileImage = profileImage;
+    if (consultationFee !== undefined) doctor.consultationFee = consultationFee;
+    if (unavailableSlots) doctor.unavailableSlots = unavailableSlots;
     await doctor.save();
 
     if (fullName && doctor.userId) {
@@ -85,6 +88,37 @@ export const deleteDoctor = async (req, res) => {
     await Doctor.findByIdAndDelete(doctorId);
     
     res.json({ message: 'Doctor deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const setUnavailability = async (req, res) => {
+  try {
+    const { type, startDate, endDate, startTime, endTime } = req.body;
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' });
+
+    const unavailability = await Unavailability.create({
+      doctorId: doctor._id,
+      type,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate || startDate),
+      startTime,
+      endTime
+    });
+
+    res.status(201).json(unavailability);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getUnavailability = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    const list = await Unavailability.find({ doctorId: doctor._id }).sort({ startDate: -1 });
+    res.json(list);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

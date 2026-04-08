@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
-import { Users, Stethoscope, Calendar, FileText } from "lucide-react";
+import { Users, Stethoscope, Calendar, FileText, Clock } from "lucide-react";
 
 export default function AdminDashboard() {
   const { data: stats } = useQuery({
@@ -21,10 +21,10 @@ export default function AdminDashboard() {
   });
 
   const cards = [
-    { label: "Patients", value: stats?.patients || 0, icon: <Users className="h-6 w-6" />, color: "text-primary" },
-    { label: "Doctors", value: stats?.doctors || 0, icon: <Stethoscope className="h-6 w-6" />, color: "text-accent" },
-    { label: "Appointments", value: stats?.appointments || 0, icon: <Calendar className="h-6 w-6" />, color: "text-warning" },
-    { label: "Blog Posts", value: stats?.blogs || 0, icon: <FileText className="h-6 w-6" />, color: "text-success" },
+    { label: "Patients", value: stats?.summary?.patients || 0, icon: <Users className="h-6 w-6" />, color: "text-primary" },
+    { label: "Doctors", value: stats?.summary?.doctors || 0, icon: <Stethoscope className="h-6 w-6" />, color: "text-accent" },
+    { label: "Appointments", value: stats?.summary?.appointments || 0, icon: <Calendar className="h-6 w-6" />, color: "text-warning" },
+    { label: "Pending Requests", value: stats?.summary?.pending || 0, icon: <Clock className="h-6 w-6" />, color: "text-amber-500" },
   ];
 
   return (

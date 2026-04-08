@@ -1,6 +1,7 @@
 import Appointment from '../models/Appointment.js';
 import Doctor from '../models/Doctor.js';
 import User from '../models/User.js';
+import Unavailability from '../models/Unavailability.js';
 import { sendEmail } from '../utils/email.js';
 
 export const getAppointments = async (req, res) => {
@@ -19,6 +20,43 @@ export const getAppointments = async (req, res) => {
         populate: { path: 'userId', select: 'fullName' }
       });
     res.json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getBookedSlots = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { date } = req.query; // YYYY-MM-DD
+    const queryDate = new Date(date);
+    
+    // 1. Get booked appointments
+    const appointments = await Appointment.find({
+      doctorId,
+      date,
+      status: { $in: ['pending', 'approved', 'pending_reschedule'] }
+    }).select('time');
+
+    // 2. Get unavailabilities from the new Unavailability model
+    const unavailabilities = await Unavailability.find({
+      doctorId,
+      startDate: { $lte: queryDate },
+      endDate: { $gte: queryDate }
+    });
+
+    const bookedSlots = appointments.map(a => a.time);
+    const unavailableRanges = unavailabilities.map(u => ({
+      start: u.startTime,
+      end: u.endTime,
+      fullDay: u.startTime === "00:00" && u.endTime === "23:59"
+    }));
+    
+    res.json({
+      booked: bookedSlots,
+      unavailableRanges,
+      isFullyBlocked: unavailableRanges.some(r => r.fullDay)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -136,13 +174,68 @@ export const getAdminRecentAppointments = async (req, res) => {
 
 export const getAdminStats = async (req, res) => {
   try {
-    const [patients, doctors, appointments, blogs] = await Promise.all([
+    const [patients, doctors, appointments, pendingAppts] = await Promise.all([
       User.countDocuments({ role: 'patient' }),
       Doctor.countDocuments(),
       Appointment.countDocuments(),
-      Appointment.countDocuments({ status: 'pending' }) // Mocking blogs for now
+      Appointment.countDocuments({ status: 'pending' })
     ]);
-    res.json({ patients, doctors, appointments, blogs });
+
+    // Status distribution
+    const statusCounts = await Appointment.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+    const statusDistribution = statusCounts.map(item => ({
+      name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+      value: item.count
+    }));
+
+    // Daily trends (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const dailyTrends = await Appointment.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+    const appointmentTrends = dailyTrends.map(item => ({
+      date: item._id,
+      count: item.count
+    }));
+
+    // Doctor performance
+    const docPerformance = await Appointment.aggregate([
+      { $group: { _id: '$doctorId', count: { $sum: 1 } } },
+      { $lookup: { from: 'doctors', localField: '_id', foreignField: '_id', as: 'doctorInfo' } },
+      { $unwind: '$doctorInfo' },
+      { $lookup: { from: 'users', localField: 'doctorInfo.userId', foreignField: '_id', as: 'userInfo' } },
+      { $unwind: '$userInfo' },
+      { $project: { name: '$userInfo.fullName', count: 1 } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Total Revenue calculation
+    const revenueStats = await Appointment.aggregate([
+      { $match: { status: 'completed' } },
+      { $lookup: { from: 'doctors', localField: 'doctorId', foreignField: '_id', as: 'doctorInfo' } },
+      { $unwind: '$doctorInfo' },
+      { $group: { _id: null, totalRevenue: { $sum: '$doctorInfo.consultationFee' } } }
+    ]);
+    const totalRevenue = revenueStats[0]?.totalRevenue || 0;
+
+    res.json({
+      summary: { patients, doctors, appointments, pending: pendingAppts, totalRevenue },
+      statusDistribution,
+      appointmentTrends,
+      doctorPerformance: docPerformance
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -176,7 +269,7 @@ export const rescheduleAppointment = async (req, res) => {
 
     appointment.date = date;
     appointment.time = time;
-    appointment.status = 'pending'; // Reset status for doctor to re-approve
+    appointment.status = 'pending_reschedule'; // Requires doctor approval
     await appointment.save();
 
     res.json(appointment);

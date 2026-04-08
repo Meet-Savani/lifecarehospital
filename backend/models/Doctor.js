@@ -7,6 +7,11 @@ const doctorSchema = new mongoose.Schema({
   profileImage: { type: String, default: '' },
   bio: { type: String, default: '' },
   available: { type: Boolean, default: true },
+  consultationFee: { type: Number, default: 150 },
+  unavailableSlots: [{
+    date: { type: String, required: true },
+    time: { type: String, required: true }
+  }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -10,6 +10,7 @@ import aiRoutes from './routes/ai.js';
 import { Server } from 'socket.io';
 import http from 'http';
 import chatRoutes from './routes/chat.js';
+import prescriptionRoutes from './routes/prescriptions.js';
 
 dotenv.config();
 
@@ -32,10 +33,18 @@ app.use('/api/content', contentRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/prescriptions', prescriptionRoutes);
 
 // Socket.IO logic
+const users = {}; // Map socketId to userId
+
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+
+  socket.on('register_user', (userId) => {
+    users[userId] = socket.id;
+    console.log(`User ${userId} registered with socket ${socket.id}`);
+  });
 
   socket.on('join_chat', (chatId) => {
     socket.join(chatId);
@@ -43,17 +52,43 @@ io.on('connection', (socket) => {
   });
 
   socket.on('send_message', (data) => {
-    // data: { chatId, senderId, message, createdAt }
+    // data: { chatId, senderId, message, type, fileUrl, fileName, createdAt }
     io.to(data.chatId).emit('receive_message', data);
-    console.log(`New message in chat ${data.chatId}: ${data.message}`);
+    console.log(`New message in chat ${data.chatId}`);
   });
 
   socket.on('typing', ({ chatId, userId }) => {
     socket.to(chatId).emit('user_typing', { userId });
   });
 
+  // Video Call Signaling
+  socket.on('call_user', ({ userToCall, signalData, from, name }) => {
+    const targetSocket = users[userToCall];
+    if (targetSocket) {
+      io.to(targetSocket).emit('incoming_call', { signal: signalData, from, name });
+    }
+  });
+
+  socket.on('answer_call', (data) => {
+    const targetSocket = users[data.to];
+    if (targetSocket) {
+      io.to(targetSocket).emit('call_accepted', data.signal);
+    }
+  });
+
+  socket.on('end_call', ({ to }) => {
+    const targetSocket = users[to];
+    if (targetSocket) {
+      io.to(targetSocket).emit('call_ended');
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    // Remove user mapping
+    Object.keys(users).forEach(key => {
+      if (users[key] === socket.id) delete users[key];
+    });
   });
 });
 
