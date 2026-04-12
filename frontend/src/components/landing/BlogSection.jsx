@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import api from "@/services/api";
 import { Calendar, ArrowRight, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
@@ -49,40 +50,44 @@ export default function BlogSection() {
               transition={{ delay: i * 0.1 }}
               className="rounded-3xl bg-card shadow-sm overflow-hidden border border-border group hover:translate-y-[-8px] transition-all duration-500"
             >
-              <div className="h-56 bg-slate-200 overflow-hidden relative">
-                <img 
-                  src={b.image || "https://images.unsplash.com/photo-1505751172107-19598f4bc1e2?auto=format&fit=crop&q=80&w=600&h=400"} 
-                  alt={b.title} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                  loading="lazy" 
-                />
-                <div className="absolute top-4 left-4">
-                   <span className="px-3 py-1 bg-background/90 backdrop-blur-sm rounded-full text-xs font-bold text-primary shadow-sm flex items-center gap-1.5">
-                     <BookOpen className="h-3 w-3" /> Blog
-                   </span>
+              <Link to={`/blog/${b.id || b._id}`}>
+                <div className="h-56 bg-slate-200 overflow-hidden relative">
+                  <img 
+                    src={b.image || "https://images.unsplash.com/photo-1505751172107-19598f4bc1e2?auto=format&fit=crop&q=80&w=600&h=400"} 
+                    alt={b.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    loading="lazy" 
+                  />
+                  <div className="absolute top-4 left-4">
+                     <span className="px-3 py-1 bg-background/90 backdrop-blur-sm rounded-full text-xs font-bold text-primary shadow-sm flex items-center gap-1.5">
+                       <BookOpen className="h-3 w-3" /> Blog
+                     </span>
+                  </div>
                 </div>
-              </div>
+              </Link>
               
               <div className="p-8">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     <Calendar className="h-3.5 w-3.5 text-primary" />
-                    {new Date(b.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {new Date(b.created_at || b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                   <span className="text-xs font-bold text-slate-300">By {b.author || "Medical Staff"}</span>
                 </div>
                 
-                <h3 className="text-xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-                  {b.title}
-                </h3>
+                <Link to={`/blog/${b.id || b._id}`}>
+                  <h3 className="text-xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                    {b.title}
+                  </h3>
+                </Link>
                 
                 <p className="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed">
                   {b.content}
                 </p>
                 
-                <button className="flex items-center gap-2 text-primary font-bold text-sm tracking-wide group/btn hover:gap-3 transition-all">
+                <Link to={`/blog/${b.id || b._id}`} className="flex items-center gap-2 text-primary font-bold text-sm tracking-wide group/btn hover:gap-3 transition-all">
                   Read Full Article <ArrowRight className="h-4 w-4" />
-                </button>
+                </Link>
               </div>
             </motion.div>
           ))}

@@ -71,10 +71,12 @@ export default function Navbar() {
             Blog
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
           </a>
-          <a href="/#contact" onClick={(e) => handleNavClick(e, "contact")} className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors relative group cursor-pointer">
-            Contact
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
-          </a>
+          {role !== "doctor" && (
+            <a href="/#contact" onClick={(e) => handleNavClick(e, "contact")} className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors relative group cursor-pointer">
+              Contact
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+            </a>
+          )}
         </div>
 
         <div className="hidden md:flex items-center gap-4">
@@ -116,6 +118,9 @@ export default function Navbar() {
             <a href="/#about" onClick={(e) => handleNavClick(e, "about")} className="px-4 py-2 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-primary/10 transition-colors">About</a>
             <a href="/#services" onClick={(e) => handleNavClick(e, "services")} className="px-4 py-2 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-primary/10 transition-colors">Services</a>
             <a href="/#doctors" onClick={(e) => handleNavClick(e, "doctors")} className="px-4 py-2 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-primary/10 transition-colors">Doctors</a>
+            {role !== "doctor" && (
+              <a href="/#contact" onClick={(e) => handleNavClick(e, "contact")} className="px-4 py-2 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-primary/10 transition-colors">Contact</a>
+            )}
           </div>
           <div className="pt-4 border-t border-border flex flex-col gap-3">
             {user ? (

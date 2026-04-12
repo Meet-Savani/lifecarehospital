@@ -1,14 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
-import { Phone, CalendarPlus, ShieldCheck, Star, Users } from "lucide-react";
+import { Phone, CalendarPlus, ShieldCheck, Star, Users, LayoutDashboard, CalendarCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import heroImg from "@/assets/hero-hospital.jpg";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function HeroSection({ id }) {
   const navigate = useNavigate();
   const [emergencyOpen, setEmergencyOpen] = useState(false);
+  const { user, role } = useAuth();
+  
   return (
     <section id={id} className="relative min-h-[700px] flex items-center overflow-hidden">
       <div className="absolute inset-0">
@@ -31,24 +34,63 @@ export default function HeroSection({ id }) {
             transition={{ duration: 0.8 }}
           >
             <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-6 backdrop-blur-sm border border-blue-400/30">
-              Trusted by 50,000+ Patients
+              {role === 'doctor' ? `Welcome Back, Dr. ${user?.fullName?.split(' ')[1] || 'Specialist'}` : 'Trusted by 50,000+ Patients'}
             </span>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-white leading-tight mb-6 tracking-tight">
-              Modern Care <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-emerald-300">With Compassion</span>
+              {role === 'doctor' ? 'Revolutionize Your' : 'Modern Care'} <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-emerald-300">
+                {role === 'doctor' ? 'Clinical Practice' : 'With Compassion'}
+              </span>
             </h1>
             <p className="text-xl text-blue-100/90 mb-10 max-w-lg leading-relaxed">
-              Experience the next generation of healthcare. Book appointments, consult top specialists,
-              and get AI-driven health insights instantly.
+              {role === 'doctor' 
+                ? 'Access your clinical dashboard, manage patient schedules, and streamline your medical consultations with our integrated healthcare platform.'
+                : 'Experience the next generation of healthcare. Book appointments, consult top specialists, and get AI-driven health insights instantly.'}
             </p>
             
             <div className="flex flex-wrap gap-4 mb-12">
-              <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform" onClick={() => navigate("/patient/book")}>
-                <CalendarPlus className="mr-2 h-5 w-5" /> Book Appointment
-              </Button>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 h-14 text-lg" onClick={() => setEmergencyOpen(true)}>
-                <Phone className="mr-2 h-5 w-5" /> Emergency
-              </Button>
+              {role === 'doctor' ? (
+                <>
+                  <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform" onClick={() => navigate("/doctor")}>
+                    <LayoutDashboard className="mr-2 h-5 w-5" /> Provider Dashboard
+                  </Button>
+                  <Button size="lg" className="bg-blue-600/90 text-white hover:bg-blue-700 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform border border-blue-400/30 backdrop-blur-md" onClick={() => navigate("/doctor/appointments")}>
+                    <CalendarCheck className="mr-2 h-5 w-5" /> Manage Appointments
+                  </Button>
+                </>
+              ) : role === 'admin' ? (
+                <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform" onClick={() => navigate("/admin")}>
+                  <LayoutDashboard className="mr-2 h-5 w-5" /> Administration Panel
+                </Button>
+              ) : (
+                <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform" onClick={() => navigate("/patient/book")}>
+                  <CalendarPlus className="mr-2 h-5 w-5" /> Book Appointment
+                </Button>
+              )}
+
+              {/* Emergency Button - Red, and Blinking - Hidden for Doctors */}
+              {role !== 'doctor' && (
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.05, 1],
+                    opacity: [1, 0.8, 1]
+                  }}
+                  transition={{ 
+                    duration: 1.5, 
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <Button 
+                    size="lg" 
+                    variant="destructive" 
+                    className="bg-red-600 hover:bg-red-700 text-white shadow-[0_0_20px_rgba(220,38,38,0.5)] px-8 h-14 text-lg border-2 border-red-500/50" 
+                    onClick={() => setEmergencyOpen(true)}
+                  >
+                    <Phone className="mr-2 h-5 w-5 animate-bounce" /> Emergency
+                  </Button>
+                </motion.div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">

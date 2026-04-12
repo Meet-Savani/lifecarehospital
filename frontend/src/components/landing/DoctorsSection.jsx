@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const fallbackDoctors = [
   { _id: "1", userId: { fullName: "Dr. Sarah Johnson" }, specialization: "Cardiologist", experience: 15, profileImage: "https://images.unsplash.com/photo-1559839734-2b71cc197ec2?auto=format&fit=crop&q=80&w=300&h=400" },
@@ -11,6 +12,8 @@ const fallbackDoctors = [
 ];
 
 export default function DoctorsSection() {
+  const { role } = useAuth();
+  const isDoctor = role === "doctor";
   const { data: doctors } = useQuery({
     queryKey: ["doctors-public"],
     queryFn: async () => {
@@ -57,11 +60,13 @@ export default function DoctorsSection() {
                     <User className="h-20 w-20 text-slate-300" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
-                  <Button variant="secondary" className="w-full bg-background/90 backdrop-blur-sm border-none text-foreground hover:bg-background">
-                    Book Appointment
-                  </Button>
-                </div>
+                {!isDoctor && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
+                    <Button variant="secondary" className="w-full bg-background/90 backdrop-blur-sm border-none text-foreground hover:bg-background">
+                      Book Appointment
+                    </Button>
+                  </div>
+                )}
               </div>
               
               <div className="p-6 text-center flex-1 flex flex-col justify-center">
