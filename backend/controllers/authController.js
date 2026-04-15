@@ -14,7 +14,21 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const user = await User.create({ fullName, email, password, role });
+    let avatarUrl = '';
+    if (req.file) {
+      avatarUrl = req.file.path;
+      if (!avatarUrl.startsWith('http')) {
+        avatarUrl = `${req.protocol}://${req.get('host')}/${avatarUrl.replace(/\\/g, '/')}`;
+      }
+    }
+
+    const user = await User.create({ 
+      fullName, 
+      email, 
+      password, 
+      role: role || 'patient',
+      avatarUrl 
+    });
 
     res.status(201).json({
       _id: user._id,
@@ -42,6 +56,7 @@ export const loginUser = async (req, res) => {
         avatarUrl: user.avatarUrl,
         phone: user.phone,
         age: user.age,
+        mustChangePassword: user.mustChangePassword,
         token: generateToken(user._id),
       });
     } else {
@@ -151,6 +166,59 @@ export const adminUpdateUser = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.password = newPassword;
+    user.mustChangePassword = false;
+    await user.save();
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updatePatientVitals = async (req, res) => {
+  try {
+    const { bloodPressure, heartRate, glucose, temperature } = req.body;
+    const patient = await User.findById(req.params.id);
+
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    // Update current metrics
+    patient.healthMetrics.bloodPressure = bloodPressure || patient.healthMetrics.bloodPressure;
+    patient.healthMetrics.heartRate = heartRate || patient.healthMetrics.heartRate;
+    patient.healthMetrics.glucose = glucose || patient.healthMetrics.glucose;
+    patient.healthMetrics.temperature = temperature || patient.healthMetrics.temperature;
+
+    // Push to history
+    patient.healthMetrics.history.push({
+      bloodPressure: patient.healthMetrics.bloodPressure,
+      heartRate: patient.healthMetrics.heartRate,
+      glucose: patient.healthMetrics.glucose,
+      temperature: patient.healthMetrics.temperature,
+      timestamp: new Date()
+    });
+
+    await patient.save();
+    res.json({ message: 'Vitals updated successfully', healthMetrics: patient.healthMetrics });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

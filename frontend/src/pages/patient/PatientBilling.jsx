@@ -51,7 +51,7 @@ export default function PatientBilling() {
             {payments?.map((p) => (
               <tr key={p._id} className="hover:bg-accent/50 transition-colors">
                 <td className="p-4">{new Date(p.createdAt).toLocaleDateString()}</td>
-                <td className="p-4 font-bold">Dr. {p.doctorId?.userId?.fullName || "Doctor"}</td>
+                <td className="p-4 font-bold">{p.doctorId?.userId?.fullName || "Doctor"}</td>
                 <td className="p-4 font-mono text-[10px] text-muted-foreground">{p.transactionId}</td>
                 <td className="p-4 font-bold text-emerald-600">₹{p.amount?.toFixed(2)}</td>
                 <td className="p-4 flex justify-end">

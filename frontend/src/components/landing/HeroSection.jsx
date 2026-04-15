@@ -51,70 +51,89 @@ export default function HeroSection({ id }) {
             <div className="flex flex-wrap gap-4 mb-12">
               {role === 'doctor' ? (
                 <>
-                  <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform" onClick={() => navigate("/doctor")}>
-                    <LayoutDashboard className="mr-2 h-5 w-5" /> Provider Dashboard
-                  </Button>
-                  <Button size="lg" className="bg-blue-600/90 text-white hover:bg-blue-700 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform border border-blue-400/30 backdrop-blur-md" onClick={() => navigate("/doctor/appointments")}>
-                    <CalendarCheck className="mr-2 h-5 w-5" /> Manage Appointments
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400 }}>
+                    <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl transition-shadow" onClick={() => navigate("/doctor")}>
+                      <LayoutDashboard className="mr-2 h-5 w-5" /> Provider Dashboard
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400 }}>
+                    <Button size="lg" className="bg-blue-600/90 text-white hover:bg-blue-700 px-8 h-14 text-lg font-semibold shadow-xl transition-shadow border border-blue-400/30 backdrop-blur-md" onClick={() => navigate("/doctor/appointments")}>
+                      <CalendarCheck className="mr-2 h-5 w-5" /> Manage Appointments
+                    </Button>
+                  </motion.div>
                 </>
               ) : role === 'admin' ? (
-                <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform" onClick={() => navigate("/admin")}>
-                  <LayoutDashboard className="mr-2 h-5 w-5" /> Administration Panel
-                </Button>
+                <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400 }}>
+                  <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl transition-shadow" onClick={() => navigate("/admin")}>
+                    <LayoutDashboard className="mr-2 h-5 w-5" /> Administration Panel
+                  </Button>
+                </motion.div>
               ) : (
-                <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl hover:scale-105 transition-transform" onClick={() => navigate("/patient/book")}>
-                  <CalendarPlus className="mr-2 h-5 w-5" /> Book Appointment
-                </Button>
+                <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400 }}>
+                  <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl transition-shadow" onClick={() => navigate("/patient/book")}>
+                    <CalendarPlus className="mr-2 h-5 w-5" /> Book Appointment
+                  </Button>
+                </motion.div>
               )}
 
-              {/* Emergency Button - Red, and Blinking - Hidden for Doctors */}
+              {/* Emergency Button — Ambulance siren strobe */}
               {role !== 'doctor' && (
                 <motion.div
-                  animate={{ 
-                    scale: [1, 1.05, 1],
-                    opacity: [1, 0.8, 1]
+                  animate={{
+                    background: [
+                      "linear-gradient(135deg, #b91c1c, #dc2626)",
+                      "linear-gradient(135deg, #1d4ed8, #2563eb)",
+                      "linear-gradient(135deg, #b91c1c, #dc2626)",
+                    ],
+                    boxShadow: [
+                      "0 0 30px 8px rgba(220,38,38,0.7), 0 0 60px 15px rgba(220,38,38,0.3)",
+                      "0 0 30px 8px rgba(37,99,235,0.7), 0 0 60px 15px rgba(37,99,235,0.3)",
+                      "0 0 30px 8px rgba(220,38,38,0.7), 0 0 60px 15px rgba(220,38,38,0.3)",
+                    ],
                   }}
-                  transition={{ 
-                    duration: 1.5, 
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+                  className="rounded-full p-0.5"
                 >
-                  <Button 
-                    size="lg" 
-                    variant="destructive" 
-                    className="bg-red-600 hover:bg-red-700 text-white shadow-[0_0_20px_rgba(220,38,38,0.5)] px-8 h-14 text-lg border-2 border-red-500/50" 
+                  <Button
+                    size="lg"
+                    className="relative overflow-hidden bg-transparent border-2 border-white/50 text-white px-8 h-14 text-lg font-black rounded-full tracking-wide uppercase"
                     onClick={() => setEmergencyOpen(true)}
                   >
-                    <Phone className="mr-2 h-5 w-5 animate-bounce" /> Emergency
+                    {/* Shimmer sweep */}
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                      animate={{ x: ["-100%", "200%"] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear", repeatDelay: 0.3 }}
+                    />
+                    <Phone className="mr-2 h-5 w-5 animate-bounce relative z-10" />
+                    <span className="relative z-10">🚨 Emergency</span>
                   </Button>
                 </motion.div>
               )}
             </div>
 
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
-              <div className="text-white">
-                <div className="flex items-center gap-2 mb-1">
-                  <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                  <span className="font-bold text-lg">ISO Certified</span>
-                </div>
-                <p className="text-xs text-blue-200">Safety standards</p>
-              </div>
-              <div className="text-white">
-                <div className="flex items-center gap-2 mb-1">
-                  <Star className="h-5 w-5 text-yellow-400" />
-                  <span className="font-bold text-lg">4.9/5 Rating</span>
-                </div>
-                <p className="text-xs text-blue-200">Patient satisfaction</p>
-              </div>
-              <div className="text-white">
-                <div className="flex items-center gap-2 mb-1">
-                  <Users className="h-5 w-5 text-blue-300" />
-                  <span className="font-bold text-lg">100+ Doctors</span>
-                </div>
-                <p className="text-xs text-blue-200">Expert specialists</p>
-              </div>
+              {[
+                { icon: <ShieldCheck className="h-5 w-5 text-emerald-400" />, value: "ISO Certified", label: "Safety standards" },
+                { icon: <Star className="h-5 w-5 text-yellow-400" />, value: "4.9/5 Rating", label: "Patient satisfaction" },
+                { icon: <Users className="h-5 w-5 text-blue-300" />, value: "100+ Doctors", label: "Expert specialists" },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1 + i * 0.15, duration: 0.5 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="text-white cursor-default"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    {stat.icon}
+                    <span className="font-bold text-lg">{stat.value}</span>
+                  </div>
+                  <p className="text-xs text-blue-200">{stat.label}</p>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </div>
@@ -129,26 +148,49 @@ export default function HeroSection({ id }) {
         />
       </div>
       
-      {/* Emergency Modal */}
+      {/* Emergency Modal — Enhanced */}
       <Dialog open={emergencyOpen} onOpenChange={setEmergencyOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive text-xl">
-              <Phone className="h-6 w-6" /> Emergency Contacts
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="bg-destructive/10 p-4 rounded-xl border border-destructive/20">
-              <h3 className="font-bold text-destructive mb-2 text-lg">LIOHNS Main Hospital</h3>
-              <p className="text-foreground font-medium mb-1">Ambulance & Emergency (24/7):</p>
-              <a href="tel:+911234567890" className="text-2xl font-bold tracking-wider text-destructive hover:underline block">+91 123 456 7890</a>
+        <DialogContent className="sm:max-w-md border-none p-0 overflow-hidden rounded-3xl">
+          {/* Pulsing red header */}
+          <div className="relative bg-gradient-to-br from-red-700 to-rose-600 px-8 py-6 overflow-hidden">
+            <motion.div
+              className="absolute inset-0 bg-white/10"
+              animate={{ opacity: [0, 0.2, 0] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-white text-2xl font-black relative z-10">
+                <motion.div
+                  animate={{ rotate: [0, -10, 10, -10, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1.5 }}
+                >
+                  <Phone className="h-7 w-7" />
+                </motion.div>
+                🚨 Emergency Contacts
+              </DialogTitle>
+              <p className="text-red-100 text-sm mt-1 relative z-10">Available 24/7 — Call immediately</p>
+            </DialogHeader>
+          </div>
+
+          <div className="p-8 space-y-4 bg-white dark:bg-card">
+            <div className="bg-red-50 dark:bg-red-950/30 p-5 rounded-2xl border-2 border-red-200 dark:border-red-800">
+              <h3 className="font-black text-red-700 dark:text-red-400 mb-3 text-lg">🏥 LIOHNS Main Hospital</h3>
+              <p className="text-slate-600 dark:text-slate-400 font-semibold text-sm mb-3">Ambulance & Emergency (24/7):</p>
+              <div className="space-y-2">
+                <a href="tel:108" className="flex items-center gap-3 text-3xl font-black tracking-wider text-red-600 hover:text-red-800 transition-colors">
+                  <Phone className="h-6 w-6 animate-pulse" /> 108
+                </a>
+                <a href="tel:079-35096700" className="flex items-center gap-3 text-xl font-bold tracking-wider text-red-600 hover:text-red-800 transition-colors">
+                  <Phone className="h-5 w-5" /> 079-35096700
+                </a>
+              </div>
             </div>
-            <div className="bg-muted p-4 rounded-xl border border-border">
-              <h4 className="font-semibold text-foreground mb-1">General Helpline</h4>
-              <a href="tel:+910987654321" className="text-lg font-medium text-primary hover:underline">+91 098 765 4321</a>
+            <div className="bg-slate-50 dark:bg-muted p-5 rounded-2xl border border-slate-200 dark:border-border">
+              <h4 className="font-bold text-foreground mb-2">📞 General Helpline</h4>
+              <a href="tel:+919104323400" className="text-xl font-bold text-primary hover:underline">+91 91043 23400</a>
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              If you are facing a life-threatening medical emergency, please proceed to the nearest hospital immediately or call the national emergency number.
+            <p className="text-xs text-muted-foreground text-center leading-relaxed">
+              ⚠️ If you are facing a life-threatening emergency, proceed to the nearest hospital immediately or call the national emergency number.
             </p>
           </div>
         </DialogContent>

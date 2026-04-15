@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle, CalendarPlus, Heart, Brain, Bone, Baby, Eye, Stethoscope } from "lucide-react";
+import BackButton from "@/components/ui/BackButton";
 
 const iconMap = {
   Heart: <Heart className="h-12 w-12" />,
@@ -63,9 +64,7 @@ export default function ServiceDetail() {
       {/* Header Banner */}
       <div className="bg-primary/5 py-12 md:py-20 border-b border-border">
         <div className="container mx-auto px-4 max-w-4xl">
-          <button onClick={() => navigate(-1)} className="flex items-center text-sm font-medium text-primary hover:underline mb-6">
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back to Services
-          </button>
+          <BackButton label="Back to Services" className="mb-6" />
           
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
             <div className="w-24 h-24 rounded-2xl bg-card shadow-xl flex items-center justify-center text-primary flex-shrink-0">
@@ -114,9 +113,11 @@ export default function ServiceDetail() {
             <div className="bg-card p-6 rounded-2xl border border-border shadow-card sticky top-24">
               <h3 className="font-bold text-foreground mb-2">Ready to take the next step?</h3>
               <p className="text-sm text-muted-foreground mb-6">Don't wait to prioritize your health. Book a consultation with our {service.title} specialists today.</p>
-              <Button className="w-full h-12 text-md flex items-center justify-center gap-2" onClick={() => navigate("/patient/book")}>
-                <CalendarPlus className="h-5 w-5" /> Book Appointment
-              </Button>
+              {(role !== 'admin' && role !== 'doctor') && (
+                <Button className="w-full h-12 text-md flex items-center justify-center gap-2" onClick={() => navigate("/patient/book")}>
+                  <CalendarPlus className="h-5 w-5" /> Book Appointment
+                </Button>
+              )}
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
 import Doctor from '../models/Doctor.js';
 import User from '../models/User.js';
 import Unavailability from '../models/Unavailability.js';
+import { sendEmail } from '../utils/email.js';
+import { getAddDoctorEmail } from '../utils/emailTemplates.js';
 
 export const getDoctors = async (req, res) => {
   try {
@@ -21,7 +23,7 @@ export const addDoctor = async (req, res) => {
       if (userExists) {
         userId = userExists._id;
       } else {
-        const user = await User.create({ fullName, email, password, role: 'doctor' });
+        const user = await User.create({ fullName, email, password, role: 'doctor', mustChangePassword: true });
         userId = user._id;
       }
     }
@@ -34,6 +36,18 @@ export const addDoctor = async (req, res) => {
       profileImage,
       available: true
     });
+
+    if (email) {
+      try {
+        await sendEmail({
+          to: email,
+          subject: 'Welcome to LIOHNS Life Care!',
+          html: getAddDoctorEmail(fullName, email, password)
+        });
+      } catch (err) {
+        console.error('Failed to send welcome email:', err);
+      }
+    }
 
     res.status(201).json(doctor);
   } catch (error) {

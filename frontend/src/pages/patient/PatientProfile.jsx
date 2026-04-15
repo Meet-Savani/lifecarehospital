@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  User, Mail, Phone, Calendar,
-  Edit3, Save, X, Activity, CheckCircle2, Camera, Loader2
+  Edit3, Save, X, Activity, CheckCircle2, Camera, Loader2,
+  User, Mail, Phone, Calendar
 } from "lucide-react";
 import api from "@/services/api";
+import InitialsAvatar from "@/components/ui/InitialsAvatar";
 
 export default function PatientProfile() {
   const { user, setUser } = useAuth();
@@ -129,9 +130,7 @@ export default function PatientProfile() {
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-primary text-4xl font-black bg-primary/10">
-                      {user?.fullName?.charAt(0)}
-                    </div>
+                    <InitialsAvatar name={user?.fullName} size="xl" className="w-full h-full border-none" />
                   )}
                 </div>
                 <button
@@ -157,7 +156,7 @@ export default function PatientProfile() {
               <div className="flex-1 pb-2">
                 <h1 className="text-2xl font-black text-foreground">{user?.fullName}</h1>
                 <p className="text-muted-foreground text-sm font-medium mt-1 flex items-center gap-2">
-                  <User className="w-4 h-4 text-primary" /> Patient Account
+                  <User className="w-4 h-4 text-primary" /> Verified Patient Profile
                 </p>
               </div>
               {!isEditing && (
@@ -193,8 +192,8 @@ export default function PatientProfile() {
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     disabled
-                    value={formData.email}
-                    className="h-12 rounded-2xl pl-11 font-bold text-sm opacity-60 cursor-not-allowed"
+                    value={formData.email?.toLowerCase()}
+                    className="h-12 rounded-2xl pl-11 font-bold text-sm opacity-80 cursor-not-allowed"
                   />
                 </div>
               </div>

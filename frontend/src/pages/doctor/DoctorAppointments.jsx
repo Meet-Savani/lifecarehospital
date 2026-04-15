@@ -2,14 +2,36 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, MessageSquare } from "lucide-react";
+import { Download, FileText, MessageSquare, Activity } from "lucide-react";
 import jsPDF from "jspdf";
 import { Link } from "react-router-dom";
 import { generatePrescriptionPDF, generateInvoicePDF } from "@/utils/pdfGenerators";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function DoctorAppointments() {
   const { user } = useAuth(); // For doctor
+  const { toast } = useToast();
+
+  const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [vitals, setVitals] = useState({
+    bloodPressure: "",
+    heartRate: "",
+    glucose: "",
+    temperature: ""
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: appointments, isLoading: apptLoading, refetch } = useQuery({
     queryKey: ["doctor-all-appointments", user?._id],
@@ -67,6 +89,36 @@ export default function DoctorAppointments() {
     generatePrescriptionPDF(presc);
   };
 
+  const openVitalsModal = (patient) => {
+    setSelectedPatient(patient);
+    setVitals({
+      bloodPressure: patient.healthMetrics?.bloodPressure || "120/80",
+      heartRate: patient.healthMetrics?.heartRate || 72,
+      glucose: patient.healthMetrics?.glucose || 90,
+      temperature: patient.healthMetrics?.temperature || 36.6
+    });
+    setIsVitalsModalOpen(true);
+  };
+
+  const handleSaveVitals = async () => {
+    if (!selectedPatient?._id) return;
+    setIsSaving(true);
+    try {
+      await api.put(`/auth/patients/${selectedPatient._id}/vitals`, vitals);
+      toast({ title: "Success", description: "Patient vitals updated successfully" });
+      setIsVitalsModalOpen(false);
+      refetch();
+    } catch (err) {
+      toast({ 
+        title: "Error", 
+        description: err.response?.data?.message || "Failed to update vitals",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <DashboardLayout role="doctor">
       <h1 className="text-2xl font-bold text-foreground mb-6">Appointment Management</h1>
@@ -81,6 +133,7 @@ export default function DoctorAppointments() {
                 <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Actions</th>
                 <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Payment Status</th>
                 <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Chat</th>
+                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Vitals</th>
                 <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">View Invoice</th>
                 <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">View Prescription</th>
               </tr>
@@ -103,7 +156,7 @@ export default function DoctorAppointments() {
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-widest uppercase ${
                         a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
                         a.status === "rejected" ? "bg-red-500/10 text-red-600" :
-                        a.status === "completed" ? "bg-blue-500/10 text-blue-600" :
+                        a.status === "completed" ? "bg-green-400/10 text-green-600" :
                         "bg-amber-500/10 text-amber-600"
                       }`}>
                         {a.status === "pending_reschedule" ? "PENDING" : a.status}
@@ -140,6 +193,20 @@ export default function DoctorAppointments() {
                       )}
                     </td>
                     <td className="p-4">
+                      {a.patientId ? (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-7 text-[10px] px-2 text-amber-600 border-amber-200 hover:bg-amber-50"
+                          onClick={() => openVitalsModal(a.patientId)}
+                        >
+                          <Activity className="w-3 h-3 mr-1" /> Vitals
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="p-4">
                       {a.isPaid ? (
                         <Button size="sm" variant="outline" className="h-7 text-[10px] px-2 text-slate-600" onClick={() => exportInvoice(a)}>
                           <FileText className="w-3 h-3 mr-1" /> View Invoice
@@ -164,6 +231,63 @@ export default function DoctorAppointments() {
           </table>
         </div>
       </div>
+
+      <Dialog open={isVitalsModalOpen} onOpenChange={setIsVitalsModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Health Metrics: {selectedPatient?.fullName}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="bp" className="text-right">Blood Pressure</Label>
+              <Input
+                id="bp"
+                value={vitals.bloodPressure}
+                onChange={(e) => setVitals({ ...vitals, bloodPressure: e.target.value })}
+                className="col-span-3"
+                placeholder="e.g. 120/80"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="hr" className="text-right">Heart Rate</Label>
+              <Input
+                id="hr"
+                type="number"
+                value={vitals.heartRate}
+                onChange={(e) => setVitals({ ...vitals, heartRate: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="glucose" className="text-right">Glucose</Label>
+              <Input
+                id="glucose"
+                type="number"
+                value={vitals.glucose}
+                onChange={(e) => setVitals({ ...vitals, glucose: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="temp" className="text-right">Body Temp (°C)</Label>
+              <Input
+                id="temp"
+                type="number"
+                step="0.1"
+                value={vitals.temperature}
+                onChange={(e) => setVitals({ ...vitals, temperature: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsVitalsModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveVitals} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Vitals"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   User, Calendar as CalendarIcon, Clock,
   Info, AlertCircle, CalendarX
@@ -53,6 +53,14 @@ export default function BookAppointment() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [showBlockedModal, setShowBlockedModal] = useState(false);
+  const [searchParams] = useSearchParams();
+  const preSelectedDoctorId = searchParams.get("doctor_id");
+
+  useEffect(() => {
+    if (preSelectedDoctorId) {
+      setDoctorId(preSelectedDoctorId);
+    }
+  }, [preSelectedDoctorId]);
 
   const { data: doctors } = useQuery({
     queryKey: ["doctors-for-booking"],
@@ -104,6 +112,15 @@ export default function BookAppointment() {
   const selectedDoctor = doctors?.find((d) => d._id === doctorId);
 
   const getSlotStatus = (slot) => {
+    // Check if slot is in the past (for today)
+    const isToday = date === new Date().toISOString().split("T")[0];
+    if (isToday) {
+      const now = new Date();
+      const current24 = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      const slot24 = convertTo24h(slot);
+      if (slot24 < current24) return "past";
+    }
+
     if (slotData?.booked?.includes(slot)) return "booked";
     const isUnavailable = slotData?.unavailableRanges?.some(range => isTimeInRange(slot, range));
     if (isUnavailable) return "unavailable";
@@ -174,9 +191,9 @@ export default function BookAppointment() {
                       <Clock className="w-5 h-5 text-primary" /> Select Time Slot
                     </h3>
                     <div className="flex gap-3 text-[10px] font-black uppercase tracking-tighter">
-                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />Available</div>
-                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-destructive rounded-full" />Booked</div>
-                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-orange-500 rounded-full" />Busy</div>
+                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-green-500 rounded-full" />Available</div>
+                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-red-500 rounded-full" />Booked</div>
+                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-yellow-400 rounded-full" />Selected</div>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
@@ -191,12 +208,12 @@ export default function BookAppointment() {
                           className={cn(
                             "h-14 rounded-2xl font-black text-xs transition-all duration-300 border-2",
                             status === "available" && time === t
-                              ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
+                              ? "bg-yellow-400 text-slate-900 border-yellow-500 shadow-lg shadow-yellow-200 scale-105"
                               : status === "available"
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:border-emerald-500/40 hover:scale-102"
-                              : status === "booked"
-                              ? "bg-muted text-muted-foreground border-border cursor-not-allowed opacity-40"
-                              : "bg-orange-500/10 text-orange-500 border-orange-500/20 cursor-not-allowed opacity-60"
+                              ? "bg-green-500 text-white border-green-600 hover:bg-green-600 hover:scale-102"
+                              : status === "booked" || status === "unavailable"
+                              ? "bg-red-500 text-white border-red-600 cursor-not-allowed opacity-80"
+                              : "bg-slate-100 text-slate-500 border-slate-300 cursor-not-allowed opacity-80"
                           )}
                         >
                           {t}
@@ -290,7 +307,7 @@ export default function BookAppointment() {
                 </motion.div>
               ) : (
                 <div className="bg-muted/30 border-2 border-dashed border-border rounded-3xl p-10 text-center text-muted-foreground">
-                  <CalendarIcon className="w-8 h-8 opacity-20 mx-auto mb-3" />
+                  <CalendarIcon className="w-8 h-8 opacity-50 mx-auto mb-3" />
                   <p className="text-xs font-black uppercase tracking-widest">Select a Physician</p>
                 </div>
               )}

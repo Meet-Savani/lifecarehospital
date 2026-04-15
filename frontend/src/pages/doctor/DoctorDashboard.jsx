@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Users, Calendar, MessageSquare, DollarSign, 
   ArrowUpRight, Clock, UserCheck, Activity, TrendingUp,
-  AlertCircle, ChevronRight
+  AlertCircle, ChevronRight, CheckCircle2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -77,11 +77,11 @@ export default function DoctorDashboard() {
             <motion.h1 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-4xl font-black text-slate-900 tracking-tight"
+              className="text-4xl font-black text-foreground tracking-tight"
             >
               Doctor's <span className="text-primary italic">Command Center</span> 🩺
             </motion.h1>
-            <p className="text-slate-500 font-medium mt-2">Precision management for your medical practice.</p>
+            <p className="text-foreground/80 font-medium mt-2">Precision management for your medical practice.</p>
           </div>
           <div className="flex items-center gap-3">
              <Link to="/doctor/appointments">
@@ -95,10 +95,10 @@ export default function DoctorDashboard() {
         {/* Enhanced Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: "Pending Requests", value: pendingCount, icon: Clock, color: "text-orange-500", bg: "bg-orange-50", subtitle: "Awaiting Action" },
-            { label: "Active Patients", value: approvedCount, icon: UserCheck, color: "text-blue-500", bg: "bg-blue-50", subtitle: "Scheduled Today" },
-            { label: "Completed", value: totalCompleted, icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-50", subtitle: "Total Success" },
-            { label: "Earnings", value: `₹${historyEarnings + projectedEarnings}`, icon: DollarSign, color: "text-indigo-500", bg: "bg-indigo-50", subtitle: `${historyEarnings} History / ${projectedEarnings} Proj.` },
+            { label: "Pending Requests", value: pendingCount, icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10", subtitle: "Awaiting Action" },
+            { label: "Active Patients", value: approvedCount, icon: UserCheck, color: "text-blue-500", bg: "bg-blue-500/10", subtitle: "Scheduled Today" },
+            { label: "Completed", value: totalCompleted, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", subtitle: "Total Success" },
+            { label: "Earnings", value: `₹${historyEarnings + projectedEarnings}`, icon: DollarSign, color: "text-indigo-500", bg: "bg-indigo-500/10", subtitle: `${historyEarnings} History / ${projectedEarnings} Proj.` },
           ].map((stat, i) => (
             <motion.div
               key={i}
@@ -107,19 +107,16 @@ export default function DoctorDashboard() {
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -5 }}
             >
-              <Card className="border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden group bg-white">
+              <Card className="border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden group bg-card">
                 <CardContent className="p-8">
                   <div className="flex justify-between items-start mb-6">
-                    <div className={`w-14 h-14 ${stat.bg} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
+                    <div className={`w-14 h-14 ${stat.bg} rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:bg-white group-hover:shadow-lg transition-all duration-500 shadow-primary/10`}>
                       <stat.icon className={`w-7 h-7 ${stat.color}`} />
                     </div>
-                    <div className="bg-slate-50 px-3 py-1 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Real-time
-                    </div>
                   </div>
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{stat.label}</p>
-                  <p className="text-4xl font-black text-slate-900 mt-2 tracking-tighter">{stat.value}</p>
-                  <p className="text-[11px] font-medium text-slate-500 mt-3 flex items-center gap-2">
+                  <p className="text-xs font-black text-foreground/80 uppercase tracking-[0.2em]">{stat.label}</p>
+                  <p className="text-4xl font-black text-foreground mt-2 tracking-tighter">{stat.value}</p>
+                  <p className="text-[11px] font-medium text-foreground/80 mt-3 flex items-center gap-2">
                      <TrendingUp className="w-3 h-3 text-emerald-500" /> {stat.subtitle}
                   </p>
                 </CardContent>
@@ -130,16 +127,16 @@ export default function DoctorDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Revenue Intelligence */}
-          <Card className="lg:col-span-2 border-none shadow-sm rounded-[3rem] overflow-hidden bg-white">
+          <Card className="lg:col-span-2 border-none shadow-sm rounded-[3rem] overflow-hidden bg-card">
             <CardHeader className="p-10 pb-0 flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-2xl font-black text-slate-900">Revenue <span className="text-primary italic">Stream</span></CardTitle>
-                <p className="text-slate-500 font-medium mt-1">Daily revenue distribution ({revTab})</p>
+                <CardTitle className="text-2xl font-black text-foreground">Revenue <span className="text-primary italic">Stream</span></CardTitle>
+                <p className="text-foreground/80 font-medium mt-1">Daily revenue distribution ({revTab})</p>
               </div>
-              <div className="bg-slate-50 p-2 rounded-2xl border border-slate-100 flex gap-2">
+              <div className="bg-muted p-2 rounded-2xl border border-border flex gap-2">
                 <Button 
                   size="sm" 
-                  className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${revTab === 'history' ? "bg-white text-slate-900 shadow-sm border border-slate-200" : "text-slate-400"}`}
+                  className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${revTab === 'history' ? "bg-background text-foreground shadow-sm border border-border" : "text-foreground/80 bg-transparent hover:bg-muted/50"}`}
                   onClick={() => setRevTab('history')}
                 >
                   History
@@ -147,7 +144,7 @@ export default function DoctorDashboard() {
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${revTab === 'projection' ? "bg-white text-slate-900 shadow-sm border border-slate-200" : "text-slate-400"}`}
+                  className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${revTab === 'projection' ? "bg-background text-foreground shadow-sm border border-border" : "text-foreground/80 bg-transparent hover:bg-muted/50"}`}
                   onClick={() => setRevTab('projection')}
                 >
                   Projection
@@ -163,9 +160,9 @@ export default function DoctorDashboard() {
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 700}} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 700}} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--foreground))', fontSize: 12, fontWeight: 700}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--foreground))', fontSize: 12, fontWeight: 700}} />
                   <Tooltip 
                     contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', padding: '20px' }}
                   />
@@ -176,21 +173,21 @@ export default function DoctorDashboard() {
           </Card>
 
           {/* Real-time Patient Queue */}
-          <Card className="border-none shadow-2xl shadow-primary/5 rounded-[3rem] overflow-hidden bg-slate-900 text-white flex flex-col">
+          <Card className="border-none shadow-2xl shadow-primary/5 rounded-[3rem] overflow-hidden bg-card text-foreground flex flex-col border border-border">
             <CardHeader className="p-10">
               <CardTitle className="text-2xl font-black flex items-center gap-4">
                 <Activity className="w-8 h-8 text-primary" /> Active Queue
               </CardTitle>
-              <p className="text-slate-400 font-medium mt-1">Predicted waiting times & priority</p>
+              <p className="text-foreground/80 font-medium mt-1">Predicted waiting times & priority</p>
             </CardHeader>
             <CardContent className="p-10 pt-0 flex-1 space-y-6 overflow-y-auto max-h-[500px] scrollbar-hide">
               {activeQueue.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-20 px-8 bg-white/5 rounded-[2.5rem] border border-white/10">
-                  <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                    <UserCheck className="w-10 h-10 text-slate-700" />
+                <div className="h-full flex flex-col items-center justify-center text-center py-20 px-8 bg-muted/30 rounded-[2.5rem] border border-border">
+                  <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <UserCheck className="w-10 h-10 text-primary" />
                   </div>
                   <h4 className="text-lg font-bold">Queue is empty</h4>
-                  <p className="text-slate-500 text-sm mt-2 font-medium">No sessions scheduled for the next hour.</p>
+                  <p className="text-foreground/80 text-sm mt-2 font-medium">No sessions scheduled for the next hour.</p>
                 </div>
               ) : (
                 activeQueue.map((appt, i) => (
@@ -199,30 +196,30 @@ export default function DoctorDashboard() {
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="relative flex flex-col gap-5 p-7 bg-white/5 rounded-[2.5rem] border border-white/10 hover:bg-white/10 transition-all duration-300 group"
+                    className="relative flex flex-col gap-5 p-7 bg-background border border-border rounded-[2.5rem] hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group"
                   >
                     <div className="flex items-center gap-5">
                       <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/20 flex items-center justify-center text-primary font-black text-xl">
                         {appt.patientId?.fullName?.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-lg font-black truncate text-white">{appt.patientId?.fullName}</p>
+                        <p className="text-lg font-black truncate text-foreground">{appt.patientId?.fullName}</p>
                         <div className="flex items-center gap-3 mt-1 text-[11px] font-bold uppercase tracking-widest text-primary">
                           <span className="bg-primary/10 px-2 py-0.5 rounded flex items-center gap-1">
                             <Clock className="w-3 h-3" /> {appt.time}
                           </span>
-                          <span className="text-slate-500">Wait: {getWaitTime(i)}m</span>
+                          <span className="text-foreground/80">Wait: {getWaitTime(i)}m</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                        <p className="text-[10px] font-black text-slate-500 tracking-tighter uppercase">
+                        <p className="text-[10px] font-black text-foreground/80 tracking-tighter uppercase">
                           {i === 0 ? "Current Patient" : `Next in ${getWaitTime(i)} min`}
                         </p>
-                        <ChevronRight className="w-5 h-5 text-slate-700 group-hover:text-primary transition-colors" />
+                        <ChevronRight className="w-5 h-5 text-foreground/80 group-hover:text-primary transition-colors" />
                     </div>
                     {i === 0 && (
-                      <div className="absolute -top-3 -right-3 w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse border-4 border-slate-900">
+                      <div className="absolute -top-3 -right-3 w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse border-4 border-background">
                         <Activity className="w-4 h-4 text-white" />
                       </div>
                     )}
@@ -230,8 +227,8 @@ export default function DoctorDashboard() {
                 ))
               )}
             </CardContent>
-            <div className="p-10 pt-0 mt-auto border-t border-white/5 py-8">
-              <p className="text-slate-400 text-xs font-medium text-center italic">
+            <div className="p-10 pt-0 mt-auto border-t border-border py-8">
+              <p className="text-foreground/80 text-xs font-medium text-center italic">
                 Wait times are estimated based on 20min average session length.
               </p>
             </div>
@@ -242,22 +239,4 @@ export default function DoctorDashboard() {
   );
 }
 
-function CheckCircle(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  )
-}
+

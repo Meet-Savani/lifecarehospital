@@ -34,8 +34,12 @@ export const createPrescription = async (req, res) => {
       meta: { prescriptionId: prescription._id, appointmentId }
     });
 
-    // Ensure appointment visibility is false
-    appointment.isPrescriptionVisible = false;
+    // Ensure appointment visibility is false only if not already paid
+    if (!appointment.isPaid) {
+      appointment.isPrescriptionVisible = false;
+    } else {
+      appointment.isPrescriptionVisible = true;
+    }
     await appointment.save();
 
     res.status(201).json(prescription);

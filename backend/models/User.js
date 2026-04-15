@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, default: '' },
   age: { type: Number },
   avatarUrl: { type: String, default: '' },
+  mustChangePassword: { type: Boolean, default: false },
   healthMetrics: {
     bloodPressure: { type: String, default: '120/80' },
     heartRate: { type: Number, default: 72 },

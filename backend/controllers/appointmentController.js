@@ -5,6 +5,11 @@ import Unavailability from '../models/Unavailability.js';
 import Payment from '../models/Payment.js';
 import { sendEmail } from '../utils/email.js';
 import { createNotification } from './notificationController.js';
+import { 
+  getNewAppointmentBookedEmail, 
+  getRequestReceivedEmail, 
+  getAppointmentStatusEmail 
+} from '../utils/emailTemplates.js';
 
 export const getAppointments = async (req, res) => {
   try {
@@ -139,16 +144,33 @@ export const createAppointment = async (req, res) => {
       meta: { appointmentId: appointment._id }
     });
 
+    // Fetch full doctor data to get email (User _id is inside populatedAppt.doctorId.userId)
+    const doctorUser = await User.findById(populatedAppt.doctorId.userId._id);
+
     try {
+      if (doctorUser && doctorUser.email) {
+        await sendEmail({
+          to: doctorUser.email,
+          subject: 'New Appointment Booking',
+          html: getNewAppointmentBookedEmail(
+            populatedAppt.doctorId.userId.fullName,
+            populatedAppt.patientId.fullName,
+            new Date(populatedAppt.date).toLocaleDateString(),
+            populatedAppt.time,
+            appointment._id
+          )
+        });
+      }
+
       await sendEmail({
         to: populatedAppt.patientId.email,
         subject: 'Appointment Request Received',
-        html: `
-          <h2>Hi ${populatedAppt.patientId.fullName},</h2>
-          <p>Your appointment request with Dr. ${populatedAppt.doctorId.userId.fullName} on ${new Date(populatedAppt.date).toLocaleDateString()} at ${populatedAppt.time} has been received.</p>
-          <p>Status: <strong>Pending Approval</strong></p>
-          <p>Thank you for choosing LIONHS Care!</p>
-        `
+        html: getRequestReceivedEmail(
+          populatedAppt.patientId.fullName,
+          populatedAppt.doctorId.userId.fullName,
+          new Date(populatedAppt.date).toLocaleDateString(),
+          populatedAppt.time
+        )
       });
     } catch (emailErr) {
       console.error('Email send failed:', emailErr.message);
@@ -189,13 +211,22 @@ export const updateAppointmentStatus = async (req, res) => {
     }
 
     try {
+      let title = `Appointment ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+      if (status === 'approved') title = "Appointment Approved";
+      else if (status === 'completed') title = "Appointment Completed";
+
       await sendEmail({
         to: appointment.patientId.email,
-        subject: `Appointment ${status.toUpperCase()}`,
-        html: `
-          <h2>Hi ${appointment.patientId.fullName},</h2>
-          <p>Your appointment with Dr. ${appointment.doctorId.userId.fullName} on ${new Date(appointment.date).toLocaleDateString()} at ${appointment.time} has been <strong>${status}</strong>.</p>
-        `
+        subject: `${title} - LIOHNS Life Care`,
+        html: getAppointmentStatusEmail(
+          title,
+          appointment.patientId.fullName,
+          appointment.doctorId.userId.fullName,
+          new Date(appointment.date).toLocaleDateString(),
+          appointment.time,
+          appointment._id,
+          status
+        )
       });
     } catch (emailErr) {
       console.error('Email send failed:', emailErr.message);

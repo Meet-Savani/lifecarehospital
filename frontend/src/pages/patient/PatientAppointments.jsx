@@ -106,7 +106,7 @@ export default function PatientAppointments() {
                           <span className={`inline-block text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold ${
                             a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
                             a.status === "rejected" ? "bg-red-500/10 text-red-600" :
-                            a.status === "completed" ? "bg-blue-500/10 text-blue-600" :
+                            a.status === "completed" ? "bg-green-400/10 text-green-600" :
                             "bg-amber-500/10 text-amber-600"
                           }`}>
                             {a.status === "pending_reschedule" ? "PENDING" : a.status}

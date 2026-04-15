@@ -75,7 +75,7 @@ export default function PatientPrescriptions() {
             </div>
           ) : (
             filteredPrescriptions.map((presc, i) => {
-              const isLocked = presc.appointmentId && !presc.appointmentId.isPrescriptionVisible;
+              const isLocked = presc.appointmentId && !presc.appointmentId.isPrescriptionVisible && !presc.appointmentId.isPaid;
 
               return (
                 <motion.div

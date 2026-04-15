@@ -9,12 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   User, Mail, Briefcase, GraduationCap, FileText, 
   Edit3, Save, X, Activity, DollarSign, Calendar, 
-  Trash2, Plus, Clock 
+  Trash2, Plus, Clock, Camera
 } from "lucide-react";
 
 export default function DoctorProfile() {
@@ -131,138 +132,120 @@ export default function DoctorProfile() {
 
   return (
     <DashboardLayout role="doctor">
-      <div className="max-w-6xl mx-auto py-8 px-4 space-y-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[3rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden"
-        >
-          <div className="h-48 bg-gradient-to-r from-slate-900 to-primary relative">
-             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,1),rgba(255,255,255,0))]" />
-            <div className="absolute -bottom-20 left-1/2 -translate-x-1/2">
-              <div className="relative group">
-                <Avatar className="w-40 h-40 border-8 border-white shadow-2xl">
-                  <AvatarImage src={imagePreview} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-4xl font-black">
-                    {user?.fullName?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <button 
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={imageLoading}
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer border-4 border-white"
-                >
-                  <Edit3 className="w-8 h-8 text-white" />
-                </button>
-                <input 
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageChange}
+      <div className="space-y-10">
+        <header>
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-4xl font-black text-foreground tracking-tight"
+          >
+            Physician <span className="text-primary italic">Profile</span> 👨‍⚕️
+          </motion.h1>
+          <p className="text-muted-foreground font-medium mt-2">Maintain your professional clinical identity and credentials.</p>
+        </header>
+
+        <Card className="border-none shadow-sm rounded-[3rem] overflow-hidden bg-card border border-border">
+          <CardHeader className="p-12 pb-0">
+             <div className="flex flex-col md:flex-row items-center gap-10">
+                <div className="relative group">
+                  <div className="w-44 h-44 rounded-[3.5rem] bg-muted flex items-center justify-center border-4 border-background shadow-2xl overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-20 h-20 text-muted-foreground" />
+                    )}
+                  </div>
+                  {isEditing && (
+                    <label className="absolute bottom-2 right-2 w-12 h-12 bg-primary rounded-2xl flex items-center justify-center cursor-pointer shadow-xl hover:scale-110 transition-transform border-4 border-background">
+                      <Camera className="w-5 h-5 text-white" />
+                      <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                    </label>
+                  )}
+                </div>
+                
+                <div className="text-center md:text-left">
+                  <h2 className="text-4xl font-black text-foreground tracking-tight">{user?.fullName}</h2>
+                  <p className="text-primary font-bold uppercase tracking-widest text-sm mt-2">{formData.specialization || "Clinical Specialist"}</p>
+                </div>
+             </div>
+          </CardHeader>
+
+          <CardContent className="p-12">
+            <form onSubmit={handleUpdate} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Medical Specialization</Label>
+                  <Input 
+                    disabled={!isEditing} 
+                    value={formData.specialization}
+                    onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                    className="h-14 rounded-2xl bg-muted/40 border-border font-bold focus:bg-background transition-all shadow-inner px-6 text-foreground"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Years of Experience</Label>
+                  <Input 
+                    disabled={!isEditing} 
+                    type="number"
+                    value={formData.experience}
+                    onChange={(e) => setFormData({...formData, experience: e.target.value})}
+                    className="h-14 rounded-2xl bg-muted/40 border-border font-bold focus:bg-background transition-all shadow-inner px-6 text-foreground"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Consultation Fee (₹)</Label>
+                <Input 
+                  disabled={!isEditing} 
+                  type="number"
+                  value={formData.consultationFee}
+                  onChange={(e) => setFormData({...formData, consultationFee: e.target.value})}
+                  className="h-14 rounded-2xl bg-muted/40 border-border font-bold focus:bg-background transition-all shadow-inner px-6 text-foreground"
                 />
               </div>
-            </div>
-          </div>
 
-          <div className="pt-24 pb-12 px-10 text-center">
-            <h1 className="text-4xl font-black text-slate-900 mb-2">{user?.fullName}</h1>
-            <p className="text-primary font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2">
-              <Activity className="w-5 h-5" /> {doctor?.specialization || "Clinical Excellence"}
-            </p>
-
-            <form onSubmit={handleUpdate} className="max-w-4xl mx-auto mt-12">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</Label>
-                  <Input
-                    disabled={!isEditing}
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 font-bold focus:ring-primary/20"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Specialization</Label>
-                  <Input
-                    disabled={!isEditing}
-                    value={formData.specialization}
-                    onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                    className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 font-bold focus:ring-primary/20"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Years Experience</Label>
-                  <Input
-                    type="number"
-                    disabled={!isEditing}
-                    value={formData.experience}
-                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                    className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 font-bold focus:ring-primary/20"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Consultation Fee ($)</Label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <Input
-                      type="number"
-                      disabled={!isEditing}
-                      value={formData.consultationFee}
-                      onChange={(e) => setFormData({ ...formData, consultationFee: e.target.value })}
-                      className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 font-black pl-12 focus:ring-primary/20"
-                    />
-                  </div>
-                </div>
-
-                <div className="lg:col-span-2 space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Professional Bio</Label>
-                  <Textarea
-                    disabled={!isEditing}
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    className="rounded-3xl border-slate-100 bg-slate-50/50 min-h-[120px] resize-none font-medium p-6"
-                    placeholder="Clinical expertise and patient care philosophy..."
-                  />
-                </div>
+              <div className="space-y-4">
+                <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Clinical Bio / Philosophy</Label>
+                <Textarea 
+                  disabled={!isEditing} 
+                  value={formData.bio}
+                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                  className="rounded-3xl bg-muted/40 border-border font-bold focus:bg-background transition-all shadow-inner p-6 min-h-[120px] text-foreground"
+                />
               </div>
 
-              <div className="flex justify-center mt-12 gap-6">
+              <div className="flex justify-end gap-4 pt-10 border-t border-border">
                 {!isEditing ? (
                   <Button 
                     type="button" 
                     onClick={() => setIsEditing(true)}
-                    className="rounded-2xl px-12 h-14 gap-3 bg-slate-900 hover:bg-slate-800 text-white shadow-2xl font-black uppercase tracking-widest text-[11px]"
+                    className="rounded-2xl h-14 px-10 bg-primary hover:bg-primary/90 text-white font-black uppercase text-[10px] tracking-widest shadow-xl flex gap-3"
                   >
-                    <Edit3 className="w-5 h-5" /> Edit Profile Settings
+                    <Edit3 className="w-5 h-5" /> Edit Profile
                   </Button>
                 ) : (
                   <>
                     <Button 
                       type="button" 
-                      variant="outline" 
+                      variant="ghost" 
                       onClick={() => setIsEditing(false)}
-                      className="rounded-2xl px-12 h-14 gap-3 border-slate-200 text-slate-500 hover:bg-slate-100 font-bold"
+                      className="rounded-2xl h-14 px-8 font-black uppercase text-[10px] tracking-widest border border-border text-muted-foreground hover:bg-muted"
                     >
-                      <X className="w-5 h-5" /> Cancel
+                      Discard
                     </Button>
                     <Button 
-                      type="submit" 
-                      className="rounded-2xl px-12 h-14 gap-3 bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 text-white font-black uppercase tracking-widest text-[11px]"
+                      type="submit"
+                      className="rounded-2xl h-14 px-10 bg-foreground text-background dark:bg-slate-800 dark:text-foreground hover:bg-foreground/90 font-black uppercase text-[10px] tracking-widest shadow-xl gap-3"
                     >
-                      <Save className="w-5 h-5" /> Update Record
+                      <Save className="w-5 h-5" /> Save Changes
                     </Button>
                   </>
                 )}
               </div>
             </form>
-          </div>
-        </motion.div>
-
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

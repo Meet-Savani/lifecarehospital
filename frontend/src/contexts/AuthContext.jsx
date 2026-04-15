@@ -31,9 +31,24 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (email, password, fullName, profileImage = null) => {
     try {
-      const response = await api.post('/auth/register', { email, password, fullName, role: 'patient' });
+      let data;
+      let headers = {};
+
+      if (profileImage instanceof File) {
+        data = new FormData();
+        data.append('email', email);
+        data.append('password', password);
+        data.append('fullName', fullName);
+        data.append('role', 'patient');
+        data.append('avatar', profileImage);
+        headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        data = { email, password, fullName, profileImage, role: 'patient' };
+      }
+
+      const response = await api.post('/auth/register', data, { headers });
       const { token, ...userData } = response.data;
 
       localStorage.setItem('token', token);
@@ -44,7 +59,7 @@ export function AuthProvider({ children }) {
       setUser(userData);
       setRole(userData.role);
     } catch (error) {
-      throw error.response?.data?.message || "Sign up failed";
+      throw typeof error === 'string' ? error : error.response?.data?.message || "Sign up failed";
     }
   };
 

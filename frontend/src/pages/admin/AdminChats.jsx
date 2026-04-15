@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import ClearableSearch from "@/components/ui/ClearableSearch";
 
 export default function AdminChats() {
   const navigate = useNavigate();
@@ -42,15 +43,14 @@ export default function AdminChats() {
           </div>
           
           <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <Input 
-                placeholder="Search by name..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-10 pl-10 border-none bg-transparent w-64 focus-visible:ring-0 font-bold"
-              />
-            </div>
+            <ClearableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search by name..."
+              leftIcon={Search}
+              className="w-64"
+              inputClassName="h-10 border-none bg-transparent focus-visible:ring-0 font-bold"
+            />
             <div className="w-px h-6 bg-slate-100" />
             <Button variant="ghost" size="icon" className="rounded-xl text-slate-400">
                <Filter className="w-4 h-4" />
@@ -75,38 +75,38 @@ export default function AdminChats() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
+                className="bg-card rounded-[2.5rem] border border-border p-8 shadow-2xl shadow-primary/5 hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
                 onClick={() => navigate(`/chat/${chat.appointmentId._id}`)}
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex -space-x-4">
-                     <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-xl border-4 border-white shadow-lg">
+                     <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-xl border-4 border-card shadow-lg">
                        {chat.appointmentId?.doctorId?.userId?.fullName?.charAt(0)}
                      </div>
-                     <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-xl border-4 border-white shadow-lg">
+                     <div className="w-12 h-12 rounded-2xl bg-foreground text-background flex items-center justify-center font-black text-xl border-4 border-card shadow-lg">
                        {chat.appointmentId?.patientId?.fullName?.charAt(0)}
                      </div>
                   </div>
-                  <div className="bg-primary/5 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                  <div className="bg-primary/10 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em]">
                     Active Session
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Participants</p>
-                    <p className="font-black text-slate-800 tracking-tight truncate">
-                      Dr. {chat.appointmentId?.doctorId?.userId?.fullName} <span className="text-slate-300 font-medium mx-1">&</span> {chat.appointmentId?.patientId?.fullName}
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-80">Surveillance Targets</p>
+                    <p className="font-black text-foreground text-lg tracking-tight truncate">
+                      Dr. {chat.appointmentId?.doctorId?.userId?.fullName} <span className="text-muted-foreground font-light mx-1">&</span> {chat.appointmentId?.patientId?.fullName}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 pt-4 border-t border-slate-50">
-                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {new Date(chat.updatedAt).toLocaleDateString()}</span>
-                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {format(new Date(chat.updatedAt), 'hh:mm a')}</span>
+                  <div className="flex items-center justify-between text-[11px] font-bold text-muted-foreground pt-4 border-t border-border">
+                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-primary/30" /> {new Date(chat.updatedAt).toLocaleDateString()}</span>
+                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary/30" /> {format(new Date(chat.updatedAt), 'hh:mm a')}</span>
                   </div>
                 </div>
 
-                <Button className="w-full mt-6 h-12 rounded-2xl bg-slate-50 text-slate-900 hover:bg-slate-900 hover:text-white border border-slate-100 shadow-none font-black text-xs uppercase tracking-widest transition-all">
+                <Button className="w-full mt-8 h-12 rounded-2xl bg-muted/50 text-foreground hover:bg-foreground hover:text-background border border-border shadow-none font-black text-[10px] uppercase tracking-[0.2em] transition-all">
                   Intervene / View Logs
                 </Button>
               </motion.div>

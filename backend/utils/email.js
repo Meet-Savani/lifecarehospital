@@ -20,10 +20,8 @@ export const sendEmail = async (options) => {
       };
 
       await transporter.sendMail(mailOptions);
-      console.log(`Email sent successfully to ${options.to}`);
     } else {
       console.warn('EMAIL_USER and EMAIL_PASS not defined. Mocking email delivery.');
-      console.log(`[MOCK EMAIL TO ${options.to}] SUBJECT: ${options.subject}`);
     }
   } catch (error) {
     console.error('Email sending failed:', error.message);

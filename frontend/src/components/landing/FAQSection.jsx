@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { HelpCircle, ChevronRight } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 const fallbackFaq = [
@@ -10,6 +10,16 @@ const fallbackFaq = [
   { id: "3", question: "Do you accept insurance?", answer: "Yes, we accept most major insurance providers and government health schemes. Please consult our billing desk for specific details." },
   { id: "4", question: "Is emergency care available 24/7?", answer: "Yes, our emergency and trauma department operates 24 hours a day, 7 days a week, with specialist teams on standby." },
 ];
+
+const dropIn = {
+  hidden: { opacity: 0, y: -15, scale: 0.98 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { delay: i * 0.1, duration: 0.4, type: "spring", stiffness: 300, damping: 20 },
+  }),
+};
 
 export default function FAQSection() {
   const { data: faq } = useQuery({
@@ -31,18 +41,31 @@ export default function FAQSection() {
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex flex-col md:flex-row gap-12 items-start">
           <motion.div 
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="md:w-1/3"
           >
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 text-primary mb-6">
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              whileInView={{ scale: 1, rotate: 0 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+              className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 text-primary mb-6"
+            >
               <HelpCircle className="h-6 w-6" />
-            </div>
+            </motion.div>
             <h2 className="text-4xl font-display font-bold text-foreground mb-4">Questions? <br />We Have Answers</h2>
-            <p className="text-slate-500 mb-8">
+            <p className="text-foreground/60 mb-8">
               Cannot find what you are looking for? <br />
-              <button className="text-primary font-bold hover:underline">Contact our support</button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-primary font-bold hover:underline"
+              >
+                Contact our support
+              </motion.button>
             </p>
           </motion.div>
 
@@ -51,10 +74,11 @@ export default function FAQSection() {
               {items.map((f, i) => (
                 <motion.div
                   key={f.id || i}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  custom={i}
+                  variants={dropIn}
+                  initial="hidden"
+                  whileInView="visible"
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
                 >
                   <AccordionItem 
                     value={String(f.id || i)} 
@@ -63,7 +87,7 @@ export default function FAQSection() {
                     <AccordionTrigger className="text-lg font-bold text-foreground hover:no-underline py-6">
                       {f.question}
                     </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base">
+                    <AccordionContent className="text-foreground/70 leading-relaxed pb-6 text-base">
                       {f.answer}
                     </AccordionContent>
                   </AccordionItem>

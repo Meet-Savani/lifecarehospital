@@ -65,7 +65,7 @@ export const generatePrescriptionPDF = (presc) => {
     pdf.setTextColor(100, 116, 139);
     pdf.setFontSize(9);
     pdf.setFont("helvetica", "normal");
-    pdf.text(`${presc.patientId?.email || "No email provided"}`, 20, y + 25);
+    pdf.text(`${presc.patientId?.email?.toLowerCase() || "No email provided"}`, 20, y + 25);
     pdf.text(`${presc.doctorId?.specialization || "Medical Specialist"}`, pageWidth / 2 + 8, y + 25);
     y += 40;
 

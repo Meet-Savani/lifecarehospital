@@ -24,6 +24,7 @@ import {
   DialogTitle, DialogTrigger 
 } from "@/components/ui/dialog";
 import useWebRTC from "@/hooks/useWebRTC";
+import BackButton from "@/components/ui/BackButton";
 
 const socket = io(import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || "http://localhost:5000", {
   transports: ["websocket"],
@@ -181,10 +182,10 @@ export default function ChatPage() {
       >
         <div className={`max-w-[85%] md:max-w-[70%] transition-colors duration-300 ${
           alignRight 
-            ? "bg-primary text-white rounded-t-[2rem] rounded-bl-[2rem] shadow-lg shadow-primary/10" 
+            ? "bg-primary text-primary-foreground rounded-t-[2rem] rounded-bl-[2rem] shadow-lg shadow-primary/10" 
             : "bg-card text-foreground rounded-t-[2rem] rounded-br-[2rem] border border-border shadow-sm"
         } p-5 relative`}>
-           <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-2 opacity-50 ${alignRight ? "text-right" : "text-left"}`}>
+           <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-2 opacity-80 ${alignRight ? "text-right" : "text-left"}`}>
              {user?.role === 'admin' ? `${sender?.fullName || 'Participant'} (${sender?.role || 'Unknown'})` : isMe ? "Sent by You" : `${otherParticipant?.fullName || "Recipient"}`}
            </p>
            
@@ -198,9 +199,9 @@ export default function ChatPage() {
                     <Maximize2 className="text-white w-8 h-8" />
                  </div>
                </div>
-               <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-white/10 text-white hover:bg-white/20" : "bg-muted/50 text-foreground hover:bg-muted"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                 <Download className="w-4 h-4 mr-2" /> Download Image
-               </Button>
+                <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20" : "bg-muted text-foreground hover:bg-muted/80"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
+                  <Download className="w-4 h-4 mr-2" /> Download Image
+                </Button>
              </div>
            )}
 
@@ -209,16 +210,16 @@ export default function ChatPage() {
                <video controls className="w-full rounded-2xl bg-black shadow-2xl">
                  <source src={m.fileUrl} />
                </video>
-               <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-white/10 text-white hover:bg-white/20" : "bg-muted/50 text-foreground hover:bg-muted"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                 <Download className="w-4 h-4 mr-2" /> Download Video
-               </Button>
+                <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20" : "bg-muted text-foreground hover:bg-muted/80"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
+                  <Download className="w-4 h-4 mr-2" /> Download Video
+                </Button>
              </div>
            )}
 
             {m.type === "pdf" && (
-             <div className={`flex flex-col gap-4 p-4 rounded-2xl border ${alignRight ? "bg-white/10 border-white/20" : "bg-muted/30 border-border"}`}>
+             <div className={`flex flex-col gap-4 p-4 rounded-2xl border ${alignRight ? "bg-primary-foreground/10 border-primary-foreground/20" : "bg-muted/30 border-border"}`}>
                <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg">
+                 <div className="w-12 h-12 rounded-xl bg-destructive flex items-center justify-center text-destructive-foreground shadow-lg">
                    <FileText className="w-6 h-6" />
                  </div>
                  <div className="flex-1 min-w-0">
@@ -227,7 +228,7 @@ export default function ChatPage() {
                  </div>
                </div>
                <div className="grid grid-cols-2 gap-2">
-                 <Button size="sm" variant="ghost" className={`rounded-xl h-10 text-xs font-bold gap-2 ${alignRight ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted"}`} onClick={() => window.open(m.fileUrl, '_blank')}>
+                 <Button size="sm" variant="ghost" className={`rounded-xl h-10 text-xs font-bold gap-2 ${alignRight ? "text-primary-foreground hover:bg-primary-foreground/10" : "text-foreground hover:bg-muted"}`} onClick={() => window.open(m.fileUrl, '_blank')}>
                    <Maximize2 className="w-4 h-4" /> Open (New Tab)
                  </Button>
                  <Button size="sm" className="rounded-xl h-10 text-xs font-bold gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-none" onClick={() => downloadFile(m.fileUrl, m.fileName)}>
@@ -236,7 +237,7 @@ export default function ChatPage() {
                </div>
              </div>
            )}
-           <span className={`text-[9px] font-black uppercase opacity-40 mt-3 block ${alignRight ? "text-right" : "text-left"}`}>
+           <span className={`text-[9px] font-black uppercase opacity-80 mt-3 block ${alignRight ? "text-right" : "text-left"}`}>
              {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
            </span>
         </div>
@@ -251,9 +252,10 @@ export default function ChatPage() {
         <motion.header 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="bg-card border border-border rounded-t-[3rem] p-6 shadow-xl flex items-center justify-between transition-colors duration-300"
+          className="bg-card border border-border rounded-t-[3rem] p-6 shadow-xl flex items-center justify-between transition-all duration-300"
         >
           <div className="flex items-center gap-5">
+            <BackButton label="" variant="dark" className="bg-muted hover:bg-muted/80 h-12 w-12 flex items-center justify-center p-0 rounded-2xl" />
             <div className="relative">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-2xl">
                  {user?.role === 'admin' ? "A" : otherParticipant?.fullName?.charAt(0)}
@@ -390,7 +392,7 @@ export default function ChatPage() {
                   className="h-14 rounded-2xl border-border bg-muted/30 pl-6 pr-4 font-bold text-foreground focus:ring-primary/20 focus:bg-card transition-all"
                 />
               </div>
-              <Button type="submit" size="icon" className="w-14 h-14 rounded-[1.25rem] bg-primary text-white shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all disabled:opacity-30" disabled={!msg.trim() && !preview}>
+              <Button type="submit" size="icon" className="w-14 h-14 rounded-[1.25rem] bg-primary text-white shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all disabled:opacity-60" disabled={!msg.trim() && !preview}>
                  <Send className="w-6 h-6" />
               </Button>
             </form>
@@ -426,12 +428,12 @@ export default function ChatPage() {
                        <p className="text-white font-black text-3xl tracking-tighter uppercase">{selectedMedia.fileName || "clinical_attachment.jpg"}</p>
                        <p className="text-white/40 text-xs font-black mt-2 tracking-[0.3em] uppercase">Secured Archive Disclosure</p>
                     </div>
-                    <Button 
-                      onClick={() => downloadFile(selectedMedia.fileUrl, selectedMedia.fileName)}
-                      className="h-16 px-12 rounded-3xl bg-white text-slate-900 hover:bg-primary hover:text-white transition-all duration-500 font-extrabold gap-4 shadow-2xl text-lg"
-                    >
-                      <Download className="w-6 h-6" /> LOCAL SAVE
-                    </Button>
+                     <Button 
+                       onClick={() => downloadFile(selectedMedia.fileUrl, selectedMedia.fileName)}
+                       className="h-16 px-12 rounded-3xl bg-foreground text-background dark:bg-slate-800 dark:text-foreground hover:bg-primary hover:text-white transition-all duration-500 font-extrabold gap-4 shadow-2xl text-lg"
+                     >
+                       <Download className="w-6 h-6" /> LOCAL SAVE
+                     </Button>
                  </div>
               </div>
             </motion.div>

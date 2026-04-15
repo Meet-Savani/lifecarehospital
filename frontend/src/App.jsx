@@ -15,6 +15,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import ChatPage from "./pages/ChatPage";
+import AllDoctors from "./pages/AllDoctors";
+import AllBlogs from "./pages/AllBlogs";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import BookAppointment from "./pages/patient/BookAppointment";
 import PatientAppointments from "./pages/patient/PatientAppointments";
@@ -58,6 +60,8 @@ function AppRoutes() {
       <Route path="/" element={<Index />} />
       <Route path="/services/:id" element={<ServiceDetail />} />
       <Route path="/blog/:id" element={<BlogDetail />} />
+      <Route path="/doctors" element={<AllDoctors />} />
+      <Route path="/blogs" element={<AllBlogs />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
@@ -110,12 +114,15 @@ function AuthWrappedApp() {
   );
 }
 
+import ScrollToTop from "./components/layout/ScrollToTop";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <ScrollToTop />
         <ThemeProvider>
           <AuthProvider>
             <AuthWrappedApp />

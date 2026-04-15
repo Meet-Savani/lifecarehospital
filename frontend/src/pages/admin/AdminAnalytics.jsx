@@ -51,7 +51,7 @@ export default function AdminAnalytics() {
             { label: "Patients", value: stats?.summary?.patients, icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
             { label: "Doctors", value: stats?.summary?.doctors, icon: Users2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
             { label: "Sessions", value: stats?.summary?.appointments, icon: Calendar, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
-            { label: "Revenue", value: `$${stats?.summary?.totalRevenue || 0}`, icon: DollarSign, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
+            { label: "Total Revenue", value: `$${stats?.summary?.totalRevenue || 0}`, icon: DollarSign, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
             { label: "Queue", value: stats?.summary?.pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
           ].map((item, i) => (
             <motion.div

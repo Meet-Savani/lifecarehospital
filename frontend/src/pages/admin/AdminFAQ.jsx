@@ -12,6 +12,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import ClearableSearch from "@/components/ui/ClearableSearch";
 
 export default function AdminFAQ() {
   const queryClient = useQueryClient();
@@ -85,15 +86,13 @@ export default function AdminFAQ() {
           </Button>
         </header>
 
-        <div className="relative">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input 
-            placeholder="Search knowledge base..." 
-            className="h-16 pl-14 pr-6 rounded-3xl bg-card border-border/50 text-lg font-medium shadow-sm focus:ring-primary/20"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <ClearableSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Search knowledge base..."
+          leftIcon={Search}
+          inputClassName="h-16 rounded-3xl bg-card border-border/50 text-lg font-medium shadow-sm focus:ring-primary/20"
+        />
 
         <div className="grid gap-6">
           <AnimatePresence mode="popLayout">
@@ -135,7 +134,7 @@ export default function AdminFAQ() {
             )}
 
             {filteredFaqs?.map((faq) => (
-              <Card key={faq._id} className="p-8 border-none shadow-xl shadow-slate-100/50 rounded-[2.5rem] bg-card hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500 group">
+              <Card key={faq._id} className="p-8 border-none shadow-2xl shadow-primary/5 rounded-[2.5rem] bg-card hover:shadow-primary/10 transition-all duration-500 group">
                 {editingId === faq._id ? (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <Input 
@@ -183,7 +182,7 @@ export default function AdminFAQ() {
                         size="icon" 
                         variant="ghost" 
                         className="rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all"
-                        onClick={() => deleteMutation.mutate(faq._id)}
+                        onClick={() => { if(window.confirm("Knowledge Base Alert: Are you sure you want to remove this FAQ entry?")) deleteMutation.mutate(faq._id); }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -194,7 +193,7 @@ export default function AdminFAQ() {
             ))}
 
             {isLoading && (
-              <div className="flex flex-col items-center justify-center py-20 grayscale opacity-20">
+              <div className="flex flex-col items-center justify-center py-20 grayscale opacity-50">
                 <Loader2 className="w-12 h-12 animate-spin mb-4" />
                 <p className="font-black uppercase tracking-widest text-xs">Syncing Knowledge Base...</p>
               </div>

@@ -97,11 +97,11 @@ export default function DoctorBilling() {
         <table className="w-full text-sm text-left">
           <thead className="bg-muted">
             <tr>
-              <th className="p-4 font-bold text-muted-foreground w-1/4">Date</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/4">Patient</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/6">Transaction ID</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/6">Amount</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/6 flex justify-end">Actions</th>
+              <th className="p-4 font-black uppercase text-muted-foreground text-[10px] tracking-widest">Date</th>
+              <th className="p-4 font-black uppercase text-muted-foreground text-[10px] tracking-widest">Patient Name</th>
+              <th className="p-4 font-black uppercase text-muted-foreground text-[10px] tracking-widest">Transaction ID</th>
+              <th className="p-4 font-black uppercase text-muted-foreground text-[10px] tracking-widest">Amount</th>
+              <th className="p-4 font-black uppercase text-muted-foreground text-[10px] tracking-widest text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -110,15 +110,17 @@ export default function DoctorBilling() {
               <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No payments found.</td></tr>
             )}
             {payments?.map((p) => (
-              <tr key={p._id} className="hover:bg-accent/50 transition-colors">
-                <td className="p-4">{new Date(p.createdAt).toLocaleDateString()}</td>
-                <td className="p-4 font-bold">{p.patientId?.fullName || "Patient"}</td>
+              <tr key={p._id} className="hover:bg-muted/50 transition-colors">
+                <td className="p-4 whitespace-nowrap">{new Date(p.createdAt).toLocaleDateString()}</td>
+                <td className="p-4 font-bold text-foreground">{p.patientId?.fullName || "Patient"}</td>
                 <td className="p-4 font-mono text-[10px] text-muted-foreground">{p.transactionId}</td>
-                <td className="p-4 font-bold text-emerald-600">₹{p.amount?.toFixed(2)}</td>
-                <td className="p-4 flex justify-end">
-                  <Button size="sm" variant="outline" className="h-8 text-xs font-bold" onClick={() => exportInvoice(p)}>
-                    <Download className="w-3 h-3 mr-1" /> View Invoice
-                  </Button>
+                <td className="p-4 font-black text-emerald-600">₹{p.amount?.toFixed(2)}</td>
+                <td className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button size="sm" variant="outline" className="h-9 px-4 rounded-xl text-xs font-bold gap-2 bg-primary/5 border-primary/10 text-primary hover:bg-primary/10" onClick={() => exportInvoice(p)}>
+                      <Download className="w-3 h-3" /> View Invoice
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}

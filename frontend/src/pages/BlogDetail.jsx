@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import BackButton from "@/components/ui/BackButton";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -24,9 +26,12 @@ const fallbackBlogs = [
   { id: "3", title: "Mental Health Matters", content: "Taking care of your mental health is just as important as physical health. In our fast-paced modern world, the brain often bears the brunt of our hectic schedules and high expectations. Neglecting mental health can lead to burnout, anxiety, and physical ailments.\n\nOne of the most effective ways to preserve mental well-being is setting boundaries. Learning to say 'no' allows you to protect your energy for things that truly matter. Additionally, social connection is a biological necessity. Even small interactions can release oxytocin and reduce feelings of isolation.\n\nDon't be afraid to seek professional help. Talking to a therapist is a sign of strength and proactive self-care, not a sign of weakness. Your mind deserves the same care you give your body.", image: "https://images.unsplash.com/photo-1527137342181-19aab11a8ee1?auto=format&fit=crop&q=80&w=1200", created_at: "2025-03-05", author: "Dr. Emily Williams" },
 ];
 
+
+
 export default function BlogDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useAuth();
 
   const [newComment, setNewComment] = useState("");
   const [localComments, setLocalComments] = useState([
@@ -106,7 +111,7 @@ export default function BlogDetail() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      
+
       {/* Article Hero */}
       <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
         <img 
@@ -115,6 +120,11 @@ export default function BlogDetail() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+
+        {/* Back button overlaid top-left on hero image */}
+        <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
+          <BackButton label="Back to Articles" variant="light" />
+        </div>
         
         <div className="absolute bottom-0 left-0 w-full p-4 md:p-8">
           <div className="container mx-auto max-w-4xl">
@@ -197,12 +207,6 @@ export default function BlogDetail() {
                   <Share2 className="h-4 w-4" /> Share Article
                 </Button>
               </div>
-              <button 
-                onClick={() => navigate("/")}
-                className="text-primary font-bold flex items-center gap-2 hover:translate-x-[-4px] transition-transform"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back to Home
-              </button>
             </div>
 
             {/* Comments Section */}
@@ -262,12 +266,14 @@ export default function BlogDetail() {
                 <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
                 <h3 className="text-xl font-bold mb-3">Expert Care Awaits</h3>
                 <p className="text-sm opacity-90 mb-6">Discuss your health concerns with our world-class specialists.</p>
-                <Button 
-                  className="w-full bg-white text-primary hover:bg-white/90 font-bold rounded-xl h-12"
-                  onClick={() => navigate("/patient/book")}
-                >
-                  Book Appointment
-                </Button>
+                {(role !== 'admin' && role !== 'doctor') && (
+                  <Button 
+                    className="w-full bg-white text-primary hover:bg-white/90 font-bold rounded-xl h-12"
+                    onClick={() => navigate("/patient/book")}
+                  >
+                    Book Appointment
+                  </Button>
+                )}
               </div>
 
               {/* Related Posts */}

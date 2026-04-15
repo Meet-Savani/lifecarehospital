@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminDoctors() {
   const { toast } = useToast();
@@ -57,6 +58,7 @@ export default function AdminDoctors() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
+      if (!window.confirm("Are you sure you want to delete this doctor record? This action cannot be undone.")) return;
       await api.delete(`/appointments/doctors/${id}`);
     },
     onSuccess: () => {
@@ -102,35 +104,45 @@ export default function AdminDoctors() {
         </Dialog>
       </div>
 
-      <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
+      <div className="bg-card rounded-[2rem] border border-border shadow-2xl shadow-primary/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="text-left p-3 font-medium text-muted-foreground">Doctor</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Specialization</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Experience</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
-                <th className="text-right p-3 font-medium text-muted-foreground">Actions</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Doctor Identity</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Medical Area</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Clinical Exp</th>
+                <th className="p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Secure Email</th>
+                <th className="text-center p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Management</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
                {doctors?.map((d) => (
-                <tr key={d._id}>
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        {d.profileImage ? <img src={d.profileImage} alt="" className="w-8 h-8 rounded-full object-cover" /> : <User className="h-4 w-4 text-muted-foreground" />}
+                <tr key={d._id} className="hover:bg-muted/30 transition-colors">
+                  <td className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/10 shadow-inner">
+                        {d.profileImage ? <img src={d.profileImage} alt="" className="w-full h-full object-cover" /> : <User className="h-5 w-5 text-primary" />}
                       </div>
-                      <span className="font-medium text-foreground">{d.userId?.fullName || "Doctor"}</span>
+                      <span className="font-black text-foreground text-base tracking-tight">{d.userId?.fullName || "Doctor"}</span>
                     </div>
                   </td>
-                  <td className="p-3 text-muted-foreground">{d.specialization}</td>
-                  <td className="p-3 text-muted-foreground">{d.experience} years</td>
-                  <td className="p-3 text-muted-foreground">{d.userId?.email || "N/A"}</td>
-                  <td className="p-3 text-right space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(d)}><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteMutation.mutate(d._id)}><Trash2 className="h-4 w-4" /></Button>
+                  <td className="p-6">
+                    <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-bold px-3 py-1 rounded-lg">
+                      {d.specialization}
+                    </Badge>
+                  </td>
+                  <td className="p-6 font-bold text-muted-foreground">{d.experience} Years Active</td>
+                  <td className="p-6 font-medium text-muted-foreground italic underline decoration-primary/20">{d.userId?.email?.toLowerCase() || "N/A"}</td>
+                  <td className="p-6 text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(d)} className="h-10 w-10 rounded-xl hover:bg-white dark:hover:bg-muted hover:shadow-sm text-muted-foreground hover:text-primary transition-all">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-destructive/5 text-muted-foreground hover:text-destructive transition-all" onClick={() => { if(window.confirm("Permanent Action: Are you sure you want to remove this medical professional from the system?")) deleteMutation.mutate(d._id); }}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

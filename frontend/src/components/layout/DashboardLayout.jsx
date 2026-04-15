@@ -126,7 +126,7 @@ function SidebarContent({ navItems, user, role, unreadCount, onClose, collapsed 
       {/* Footer */}
       <div className={cn("p-4 border-t border-border mt-auto space-y-3", collapsed && "px-2")}>
         <div className={cn(
-          "flex items-center justify-between p-3 rounded-2xl bg-muted/50 border border-muted/20 transition-all",
+          "flex items-center justify-between p-3 rounded-2xl bg-muted/80 dark:bg-muted border border-border transition-all",
           collapsed && "p-2 justify-center"
         )}>
           <div className="flex items-center gap-3 min-w-0">

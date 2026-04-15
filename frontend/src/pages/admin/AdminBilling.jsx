@@ -37,11 +37,11 @@ export default function AdminBilling() {
           <thead className="bg-muted">
             <tr>
               <th className="p-4 font-bold text-muted-foreground w-1/6">Date</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/5">Patient</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/5">Doctor</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/6">Transaction ID</th>
-              <th className="p-4 font-bold text-muted-foreground w-1/6">Amount</th>
-              <th className="p-4 font-bold text-muted-foreground flex justify-end">Actions</th>
+              <th className="p-4 font-bold text-muted-foreground w-1/5">Patient Name</th>
+              <th className="p-4 font-bold text-muted-foreground w-1/5">Doctor Name</th>
+              <th className="p-4 font-bold text-muted-foreground w-1/6 text-center">Transaction ID</th>
+              <th className="p-4 font-bold text-muted-foreground w-1/6 text-center">Amount</th>
+              <th className="p-4 font-bold text-muted-foreground text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -53,10 +53,10 @@ export default function AdminBilling() {
               <tr key={p._id} className="hover:bg-accent/50 transition-colors">
                 <td className="p-4">{new Date(p.createdAt).toLocaleDateString()}</td>
                 <td className="p-4 font-bold">{p.patientId?.fullName || "Patient"}</td>
-                <td className="p-4 font-bold text-primary">Dr. {p.doctorId?.userId?.fullName || "Doctor"}</td>
-                <td className="p-4 font-mono text-[10px] text-muted-foreground">{p.transactionId}</td>
-                <td className="p-4 font-bold text-emerald-600">₹{p.amount?.toFixed(2)}</td>
-                <td className="p-4 flex justify-end">
+                <td className="p-4 font-bold text-primary">{p.doctorId?.userId?.fullName || "Doctor"}</td>
+                <td className="p-4 font-mono text-[10px] text-muted-foreground text-center">{p.transactionId}</td>
+                <td className="p-4 font-bold text-emerald-600 text-center">₹{p.amount?.toFixed(2)}</td>
+                <td className="p-4 text-center">
                   <Button size="sm" variant="outline" className="h-8 text-xs font-bold" onClick={() => exportInvoice(p)}>
                     <Download className="w-3 h-3 mr-1" /> View Invoice
                   </Button>

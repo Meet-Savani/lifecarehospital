@@ -7,7 +7,7 @@ import {
   FileText, User as UserIcon, Calendar, 
   Search, Pill, History, ChevronRight,
   TrendingUp, Activity, Briefcase, Clock,
-  UtensilsCrossed
+  UtensilsCrossed, X, Mail, Phone, Tag
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Dialog, DialogContent, DialogHeader, 
-  DialogTitle, DialogTrigger 
+  DialogTitle, DialogTrigger, DialogDescription
 } from "@/components/ui/dialog";
 
 export default function PatientHistory() {
@@ -41,12 +41,8 @@ export default function PatientHistory() {
     enabled: !!doctor,
   });
 
-  // Get unique list of patients seen by this doctor
   const patientsSeen = Array.from(new Set(appointments?.map(a => a.patientId?._id)))
-    .map(id => {
-      const appt = appointments?.find(a => a.patientId?._id === id);
-      return appt?.patientId;
-    })
+    .map(id => appointments?.find(a => a.patientId?._id === id)?.patientId)
     .filter(p => p && p.fullName.toLowerCase().includes(search.toLowerCase()));
 
   const { data: prescriptions } = useQuery({
@@ -68,29 +64,29 @@ export default function PatientHistory() {
             <motion.h1 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-4xl font-black text-slate-900 tracking-tight"
+              className="text-4xl font-black text-foreground tracking-tight"
             >
-              Patient <span className="text-primary italic">Archives</span> 📚
+              Clinical <span className="text-primary italic">Journals</span> 📁
             </motion.h1>
-            <p className="text-slate-500 font-medium mt-2">Comprehensive medical history and treatment logs.</p>
+            <p className="text-muted-foreground font-medium mt-2">Comprehensive medical history and session archives.</p>
           </div>
           
           <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
             <Input 
               placeholder="Search patients by name..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-14 pl-12 rounded-2xl border-slate-100 bg-white w-full md:w-80 shadow-sm focus:ring-primary/20"
+              className="h-14 pl-12 rounded-2xl border-border bg-card w-full md:w-80 shadow-sm focus:ring-primary/20"
             />
           </div>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {patientsSeen.length === 0 ? (
-            <div className="col-span-full py-20 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
-               <UserIcon className="w-16 h-16 text-slate-200 mx-auto mb-4" />
-               <p className="font-bold text-slate-400">No patient records found.</p>
+            <div className="col-span-full py-20 text-center bg-card rounded-[3rem] border-2 border-dashed border-border">
+               <UserIcon className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
+               <p className="font-bold text-muted-foreground">No patient records found.</p>
             </div>
           ) : (
             patientsSeen.map((patient, i) => (
@@ -101,29 +97,25 @@ export default function PatientHistory() {
                 transition={{ delay: i * 0.05 }}
               >
                 <Card 
-                  className="group rounded-[2.5rem] border-none shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden bg-white cursor-pointer"
+                  className="group bg-card rounded-[2.5rem] border border-border p-8 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col items-center text-center relative overflow-hidden cursor-pointer"
                   onClick={() => setSelectedPatient(patient)}
                 >
-                  <CardContent className="p-8">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary font-black text-2xl group-hover:scale-110 transition-transform duration-500">
-                        {patient.fullName.charAt(0)}
-                      </div>
-                      <div className="bg-slate-50 px-3 py-1 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Patient
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-black text-slate-900 truncate">{patient.fullName}</h3>
-                    <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest truncate">{patient.email}</p>
+                  <div className="absolute top-0 left-0 w-full h-2 bg-primary/10 group-hover:h-full group-hover:opacity-[0.02] transition-all duration-500" />
+                  
+                  <div className="w-24 h-24 rounded-3xl bg-primary/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                    <span className="text-3xl font-black text-primary uppercase">{patient.fullName[0]}</span>
+                  </div>
+
+                  <h3 className="text-xl font-black text-foreground mb-1">{patient.fullName}</h3>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">{patient.email?.toLowerCase()}</p>
                     
-                    <div className="mt-8 flex items-center justify-between text-slate-500 text-xs font-bold">
-                       <span className="flex items-center gap-2">
-                          <History className="w-4 h-4 text-primary" /> 
-                          {appointments?.filter(a => a.patientId?._id === patient._id).length} Sessions
-                       </span>
-                       <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary transition-colors" />
-                    </div>
-                  </CardContent>
+                  <div className="mt-auto flex items-center justify-between w-full text-muted-foreground text-xs font-bold">
+                     <span className="flex items-center gap-2">
+                        <History className="w-4 h-4 text-primary" /> 
+                        {appointments?.filter(a => a.patientId?._id === patient._id).length} Sessions
+                     </span>
+                     <ChevronRight className="w-5 h-5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                  </div>
                 </Card>
               </motion.div>
             ))
@@ -131,94 +123,78 @@ export default function PatientHistory() {
         </div>
 
         <Dialog open={!!selectedPatient} onOpenChange={(open) => !open && setSelectedPatient(null)}>
-           <DialogContent className="max-w-5xl rounded-[3.5rem] border-none p-0 overflow-hidden bg-slate-50 max-h-[90vh]">
-              <div className="h-40 bg-slate-900 p-10 flex items-end justify-between relative overflow-hidden">
-                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-                 <div className="relative z-10">
-                    <h2 className="text-3xl font-black text-white">{selectedPatient?.fullName}</h2>
-                    <p className="text-white/60 font-medium text-sm mt-1">Medical Dossier & Historical Analytics</p>
-                 </div>
-                 <div className="relative z-10 flex gap-4">
-                    <div className="bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-sm text-center min-w-[80px]">
-                       <p className="text-[10px] font-black uppercase text-white/40">Status</p>
-                       <p className="text-lg font-black text-emerald-400">Active</p>
+           <DialogContent className="max-w-5xl rounded-[3rem] p-0 overflow-hidden border-border bg-background">
+               <div className="bg-primary p-12 text-primary-foreground relative">
+                 <div className="flex flex-col md:flex-row items-center gap-8">
+                   <div className="w-32 h-32 rounded-[2.5rem] bg-primary-foreground/10 flex items-center justify-center border border-primary-foreground/10 shrink-0">
+                     <span className="text-5xl font-black text-primary-foreground">{selectedPatient?.fullName[0]}</span>
+                   </div>
+                   <div className="text-center md:text-left flex-1">
+                    <DialogTitle className="text-4xl font-black tracking-tight">{selectedPatient?.fullName}</DialogTitle>
+                    <DialogDescription className="text-xs font-bold uppercase tracking-widest mt-2 opacity-90 text-primary-foreground">
+                      Comprehensive Clinical Overview & Contact Information
+                    </DialogDescription>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 mt-4 opacity-90">
+                       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary-foreground">
+                         <Mail className="w-4 h-4" /> {selectedPatient?.email?.toLowerCase()}
+                       </div>
                     </div>
-                 </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10 overflow-y-auto">
-                 {/* Appointment History */}
+              <div className="bg-background dark:bg-card p-12 grid grid-cols-1 md:grid-cols-2 gap-10 overflow-y-auto max-h-[60vh]">
                  <div className="space-y-6">
-                    <h4 className="text-lg font-black text-slate-900 flex items-center gap-3">
+                    <h4 className="text-lg font-black text-foreground flex items-center gap-3">
                        <Calendar className="w-5 h-5 text-primary" /> Appointment Logs
                     </h4>
                     <div className="space-y-4">
-                       {patientAppts.length === 0 ? (
-                         <div className="p-8 text-center bg-white rounded-3xl border border-slate-100 italic text-slate-400 text-sm">No historical logs found.</div>
-                       ) : (
-                         patientAppts.map((appt, i) => (
-                           <div key={i} className="p-6 bg-white rounded-3xl border border-slate-100 flex items-center justify-between group hover:shadow-lg transition-all duration-300">
-                              <div>
-                                 <p className="font-black text-slate-800">{new Date(appt.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{appt.time}</p>
-                              </div>
-                              <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                appt.status === 'completed' ? 'bg-emerald-50 text-emerald-500' : 
-                                appt.status === 'approved' ? 'bg-blue-50 text-blue-500' : 'bg-slate-50 text-slate-400'
-                              }`}>
-                                 {appt.status}
-                              </div>
+                       {patientAppts.map((appt, i) => (
+                         <div key={i} className="flex gap-6 p-8 bg-card rounded-[2rem] border border-border shadow-sm">
+                           <div className="w-16 h-16 rounded-2xl bg-primary/5 flex flex-col items-center justify-center shrink-0 border border-primary/10">
+                             <span className="text-xs font-black text-primary">{new Date(appt.date).toLocaleDateString('en-US', { day: '2-digit' })}</span>
+                             <span className="text-[8px] font-black uppercase text-primary/60">{new Date(appt.date).toLocaleDateString('en-US', { month: 'short' })}</span>
                            </div>
-                         ))
-                       )}
+                           <div>
+                             <h4 className="font-black text-foreground mb-1">{appt.reason || "Consultation"}</h4>
+                             <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-90">
+                               <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {appt.time}</span>
+                               <span className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> {appt.status}</span>
+                             </div>
+                           </div>
+                         </div>
+                       ))}
                     </div>
                  </div>
 
-                 {/* Prescription History */}
                  <div className="space-y-6">
-                    <h4 className="text-lg font-black text-slate-900 flex items-center gap-3">
+                    <h4 className="text-lg font-black text-foreground flex items-center gap-3">
                        <Pill className="w-5 h-5 text-secondary" /> Issued Prescriptions
                     </h4>
                     <div className="space-y-4">
-                       {prescriptions?.length === 0 ? (
-                         <div className="p-8 text-center bg-white rounded-3xl border border-slate-100 italic text-slate-400 text-sm">No pharmaceutical records issued.</div>
-                       ) : (
-                         prescriptions?.map((presc, i) => (
-                           <div key={i} className="p-8 bg-white rounded-[2rem] border border-slate-100 space-y-6 hover:shadow-lg transition-all">
-                              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                                 <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{new Date(presc.createdAt).toLocaleDateString()}</p>
-                                 <div className="w-8 h-8 rounded-lg bg-secondary/5 flex items-center justify-center">
-                                    <FileText className="w-4 h-4 text-secondary" />
+                       {prescriptions?.map((presc, i) => (
+                         <Card key={i} className="p-8 bg-card rounded-[2rem] border border-border shadow-sm">
+                            <div className="flex justify-between items-start mb-6">
+                               <div>
+                                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">Prescribed on</p>
+                                  <p className="font-black text-foreground">{new Date(presc.createdAt).toLocaleDateString()}</p>
+                               </div>
+                               <FileText className="w-6 h-6 text-primary opacity-50" />
+                            </div>
+                            <div className="space-y-3">
+                               {presc.medicines.map((m, idx) => (
+                                 <div key={idx} className="flex justify-between items-center text-sm p-3 bg-muted/30 rounded-xl">
+                                    <span className="font-bold text-foreground">💊 {m.name}</span>
+                                    <span className="text-[10px] font-black uppercase text-primary opacity-90"><UtensilsCrossed className="inline w-3 h-3 mr-1" />{m.mealTiming}</span>
                                  </div>
-                              </div>
-                              <div className="space-y-4">
-                                 {presc.medicines.map((m, idx) => (
-                                    <div key={idx} className="space-y-2">
-                                       <div className="flex items-center justify-between">
-                                          <span className="font-black text-slate-800 text-sm">{m.name}</span>
-                                          <div className="flex gap-1">
-                                             {m.dosage?.morning && <span className="w-2 h-2 rounded-full bg-blue-400" title="Morning" />}
-                                             {m.dosage?.noon && <span className="w-2 h-2 rounded-full bg-orange-400" title="Noon" />}
-                                             {m.dosage?.evening && <span className="w-2 h-2 rounded-full bg-indigo-400" title="Evening" />}
-                                          </div>
-                                       </div>
-                                       <div className="flex items-center gap-4">
-                                          <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                                             <UtensilsCrossed className="w-3 h-3" /> {m.mealTiming}
-                                          </span>
-                                       </div>
-                                       {m.description && <p className="text-[10px] text-slate-500 italic">"{m.description}"</p>}
-                                    </div>
-                                 ))}
-                              </div>
-                              {presc.generalNotes && (
-                                <div className="bg-slate-50 p-4 rounded-2xl">
-                                   <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Doctor Advice</p>
-                                   <p className="text-[11px] text-slate-600 font-medium italic">"{presc.generalNotes}"</p>
-                                </div>
-                              )}
-                           </div>
-                         ))
+                               ))}
+                            </div>
+                         </Card>
+                       ))}
+                       {prescriptions?.length === 0 && (
+                         <div className="p-10 text-center bg-muted/20 rounded-[2rem] border-2 border-dashed border-border opacity-80 italic text-muted-foreground text-sm">
+                            No prescriptions issued yet.
+                         </div>
                        )}
                     </div>
                  </div>

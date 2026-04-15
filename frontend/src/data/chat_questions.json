@@ -1,0 +1,92 @@
+[
+  {
+    "id": "book_appointment",
+    "question": "How to book an appointment?",
+    "answer": "To book an appointment, go to the Appointments page, select a doctor, choose an available date and time, and confirm.",
+    "related": ["make_payment", "reschedule_appointment", "cancel_appointment"]
+  },
+  {
+    "id": "reschedule_appointment",
+    "question": "How to reschedule an appointment?",
+    "answer": "Open the Appointment details, click Reschedule, pick a new slot, and confirm your changes.",
+    "related": ["cancel_appointment", "book_appointment"]
+  },
+  {
+    "id": "cancel_appointment",
+    "question": "How to cancel an appointment?",
+    "answer": "Open the Appointment details and click Cancel. Please note that cancellations may be subject to a fee if done late.",
+    "related": ["reschedule_appointment", "book_appointment"]
+  },
+  {
+    "id": "consult_charges",
+    "question": "What are the consultation charges?",
+    "answer": "Consultation charges vary by doctor and specialization. You can view the fee on the doctor's profile before booking.",
+    "related": ["make_payment", "book_appointment"]
+  },
+  {
+    "id": "make_payment",
+    "question": "How to make payment?",
+    "answer": "Payments can be made via the Payments section using online methods. Choose your pending invoice to proceed.",
+    "related": ["download_invoice", "consult_charges"]
+  },
+  {
+    "id": "access_prescription",
+    "question": "When can I access my prescription?",
+    "answer": "Your prescription will be available in the Prescriptions tab immediately after your consultation finishes.",
+    "related": ["download_invoice", "book_appointment"]
+  },
+  {
+    "id": "download_invoice",
+    "question": "How to download invoice?",
+    "answer": "Go to the Billing section, select the completed payment, and click the Download PDF button.",
+    "related": ["make_payment", "access_prescription"]
+  },
+  {
+    "id": "contact_doctor",
+    "question": "How to contact doctor?",
+    "answer": "Use the Chat feature on the Doctor's profile or click the Call button during your scheduled appointment time.",
+    "related": ["book_appointment", "hospital_hours"]
+  },
+  {
+    "id": "chat_working",
+    "question": "How does chat system work?",
+    "answer": "This chat system provides structured answers to common queries to help you navigate quickly. You can click options to proceed.",
+    "related": ["contact_doctor", "use_ai_assistant"]
+  },
+  {
+    "id": "update_profile",
+    "question": "How to update my profile?",
+    "answer": "Go to Patient Profile from the dashboard, click Edit, update your details, and save the changes.",
+    "related": ["see_history", "book_appointment"]
+  },
+  {
+    "id": "required_docs",
+    "question": "What documents are required?",
+    "answer": "You need a valid ID for your first visit. Any existing medical reports can be uploaded in the Profile or carried physically.",
+    "related": ["book_appointment", "update_profile"]
+  },
+  {
+    "id": "appointment_status",
+    "question": "How to check appointment status?",
+    "answer": "Go to the Appointments tab. Your upcoming, pending, and completed appointments are tagged with their status.",
+    "related": ["reschedule_appointment", "cancel_appointment"]
+  },
+  {
+    "id": "see_history",
+    "question": "How to see my medical history?",
+    "answer": "You can view your medical history, including past appointments and prescriptions, under the Patient Profile section.",
+    "related": ["access_prescription", "update_profile"]
+  },
+  {
+    "id": "hospital_hours",
+    "question": "What are hospital working hours?",
+    "answer": "The hospital operates 24/7 for emergencies, while regular OPD consultations are mainly between 9 AM and 8 PM.",
+    "related": ["contact_doctor", "book_appointment"]
+  },
+  {
+    "id": "use_ai_assistant",
+    "question": "How to use AI assistant?",
+    "answer": "Simply click on the suggested questions provided in the chat interface to navigate through common queries without waiting for human support. You cannot type custom queries, simply select a question.",
+    "related": ["chat_working", "book_appointment"]
+  }
+]

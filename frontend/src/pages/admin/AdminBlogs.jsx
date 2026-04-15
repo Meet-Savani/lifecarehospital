@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import ClearableSearch from "@/components/ui/ClearableSearch";
 
 export default function AdminBlogs() {
   const queryClient = useQueryClient();
@@ -44,6 +45,8 @@ export default function AdminBlogs() {
     onSuccess: () => {
       queryClient.invalidateQueries(["admin-blogs"]);
       setEditingId(null);
+      setIsAdding(false);
+      setFormData({ title: "", content: "", image: "", author: "Admin" });
       toast.success("Blog updated successfully");
     }
   });
@@ -86,15 +89,13 @@ export default function AdminBlogs() {
           </Button>
         </header>
 
-        <div className="relative">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input 
-            placeholder="Search publications..." 
-            className="h-16 pl-14 pr-6 rounded-3xl bg-card border-border/50 text-lg font-medium shadow-sm focus:ring-secondary/20"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <ClearableSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Search publications..."
+          leftIcon={Search}
+          inputClassName="h-16 rounded-3xl bg-card border-border/50 text-lg font-medium shadow-sm focus:ring-secondary/20"
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <AnimatePresence mode="popLayout">
@@ -172,18 +173,20 @@ export default function AdminBlogs() {
                     alt={blog.title} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
+                  {/* Dark shadow overlay so buttons are always visible */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
                   <div className="absolute top-4 right-4 flex gap-2">
                      <Button 
                        size="icon" 
-                       className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-secondary"
+                       className="w-10 h-10 rounded-xl bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-secondary"
                        onClick={() => { setEditingId(blog._id); setFormData({ title: blog.title, content: blog.content, image: blog.image, author: blog.author }); setIsAdding(true); }}
                      >
                        <Edit2 className="w-4 h-4" />
                      </Button>
                      <Button 
                        size="icon" 
-                       className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-destructive"
-                       onClick={() => deleteMutation.mutate(blog._id)}
+                       className="w-10 h-10 rounded-xl bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-destructive"
+                       onClick={() => { if(window.confirm("Editorial Warning: Permanently delete this publication?")) deleteMutation.mutate(blog._id); }}
                      >
                        <Trash2 className="w-4 h-4" />
                      </Button>
@@ -209,7 +212,7 @@ export default function AdminBlogs() {
         </div>
 
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-40 grayscale opacity-20">
+          <div className="flex flex-col items-center justify-center py-40 grayscale opacity-50">
             <Loader2 className="w-12 h-12 animate-spin mb-4" />
             <p className="font-black uppercase tracking-widest text-xs">Syncing Editorial Logs...</p>
           </div>

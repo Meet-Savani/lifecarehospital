@@ -1,129 +1,210 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import ThemeToggle from "@/components/layout/ThemeToggle";
+import { Heart, Camera, X, Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [profileImage, setProfileImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  const fileInputRef = useRef(null);
   const { signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeImage = () => {
+    setProfileImage(null);
+    setPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
-      await signUp(email, password, fullName);
-      toast({ title: "Registration secured!", description: "Welcome to the LIOHNS Health Network." });
+      await signUp(email.toLowerCase(), password, fullName, profileImage);
+      toast({ title: "Registration successful!", description: "Welcome to LIOHNS Life Care." });
       navigate("/patient");
     } catch (err) {
-      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+      toast({ title: "Registration failed", description: err.message || err, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 transition-colors duration-300 relative overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-[120px] -z-10" />
-      <div className="absolute bottom-0 -left-20 w-96 h-96 bg-secondary/5 rounded-full blur-[120px] -z-10" />
-      
-      <div className="fixed top-8 right-8 z-50">
-        <ThemeToggle />
+    <div className="min-h-screen w-full flex items-center justify-center bg-background px-4 py-8 relative overflow-hidden">
+      {/* Subtle Background Effect */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]" />
       </div>
 
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
-            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
-              <Heart className="h-7 w-7 text-white" />
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md z-10"
+      >
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-flex items-center gap-2 mb-2 group">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <Heart className="h-6 w-6 text-white" />
             </div>
-            <span className="text-3xl font-black text-foreground tracking-tighter uppercase">LIOHNS</span>
+            <span className="text-2xl font-black text-foreground tracking-tighter uppercase">LIOHNS Life Care</span>
           </Link>
-          <h1 className="text-3xl font-black text-foreground tracking-tight">Accession Registry</h1>
-          <p className="text-sm font-bold text-muted-foreground mt-2 uppercase tracking-widest leading-relaxed">Join the next generation of healthcare</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Join our healthcare network today</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-card p-10 rounded-[2.5rem] shadow-2xl border border-border space-y-8 backdrop-blur-xl transition-all duration-300">
-          <div className="space-y-5">
-            <div className="space-y-2.5">
-              <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Full Legal Name</Label>
-              <Input 
-                id="name" 
-                value={fullName} 
-                onChange={(e) => setFullName(e.target.value)} 
-                required 
-                placeholder="Dr. John Doe / Patient Name"
-                className="h-14 rounded-2xl border-border bg-background focus:ring-4 focus:ring-primary/10 transition-all px-5 font-medium"
-              />
-            </div>
-            <div className="space-y-2.5">
-              <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Communication Channel (Email)</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
-                placeholder="contact@identity.med"
-                className="h-14 rounded-2xl border-border bg-background focus:ring-4 focus:ring-primary/10 transition-all px-5 font-medium"
-              />
-            </div>
-            <div className="space-y-2.5">
-              <Label htmlFor="password" name="password-label" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Secure Passkey</Label>
-              <div className="relative">
-                <Input 
-                  id="password" 
-                  type={showPassword ? "text" : "password"} 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  required 
-                  placeholder="••••••••" 
-                  minLength={6}
-                  className="h-14 rounded-2xl border-border bg-background focus:ring-4 focus:ring-primary/10 transition-all pl-5 pr-12 font-medium"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+        <div className="bg-card p-8 rounded-[2rem] shadow-2xl border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-6 text-center">Create Account</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex justify-center mb-4">
+               <div className="relative group">
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-20 h-20 rounded-2xl bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer overflow-hidden hover:border-primary transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+                  {preview ? (
+                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <Camera size={24} className="text-muted-foreground" />
+                      <span className="text-[10px] font-bold text-muted-foreground mt-1 uppercase">Photo</span>
+                    </>
+                  )}
+                </div>
+                {preview && (
+                  <button 
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground p-1 rounded-full shadow-md hover:scale-110 transition-transform"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileChange} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
               </div>
             </div>
-          </div>
 
-          <div className="p-4 bg-muted/50 rounded-2xl border border-border flex items-start gap-4">
-             <ShieldCheck className="w-6 h-6 text-emerald-500 mt-0.5" />
-             <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">By registering, you agree to our HIPPA-compliant data processing protocols and clinical service terms.</p>
-          </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input 
+                  id="fullName" 
+                  value={fullName} 
+                  onChange={(e) => setFullName(e.target.value)} 
+                  required 
+                  placeholder="John Doe"
+                  className="rounded-xl h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  required 
+                  placeholder="example@gmail.com"
+                  className="rounded-xl h-11"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 text-left">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input 
+                      id="password" 
+                      type={showPassword ? "text" : "password"} 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)} 
+                      required 
+                      placeholder="••••••••"
+                      className="rounded-xl h-11 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2 text-left">
+                  <Label htmlFor="confirm">Confirm</Label>
+                  <div className="relative">
+                    <Input 
+                      id="confirm" 
+                      type={showConfirmPassword ? "text" : "password"} 
+                      value={confirmPassword} 
+                      onChange={(e) => setConfirmPassword(e.target.value)} 
+                      required 
+                      placeholder="••••••••"
+                      className="rounded-xl h-11 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <Button type="submit" className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all duration-500 bg-primary hover:scale-[0.98]" disabled={loading}>
-            {loading ? "Establishing Identity..." : "Finalize Enrollment"}
-          </Button>
+            <Button type="submit" className="w-full h-12 rounded-xl font-bold bg-primary mt-2" disabled={loading}>
+              {loading ? "Creating account..." : "Register"}
+            </Button>
 
-          <div className="text-center pt-4 border-t border-border/50">
-            <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
-              Already have an endpoint?{" "}
-              <Link to="/login" className="text-primary hover:underline hover:scale-105 inline-block transition-transform">Sign Session</Link>
-            </p>
-          </div>
-        </form>
-        
-        <div className="mt-10 text-center">
-            <Link to="/" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] hover:text-primary transition-colors">← Exit to Global Hub</Link>
+            <div className="text-center pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary font-bold hover:underline">Login now</Link>
+              </p>
+            </div>
+          </form>
         </div>
-      </div>
+        
+        <div className="mt-8 text-center px-4">
+             <Link to="/" className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">← Back to homepage</Link>
+        </div>
+      </motion.div>
     </div>
   );
 }

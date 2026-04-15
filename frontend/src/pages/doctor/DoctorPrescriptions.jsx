@@ -112,24 +112,24 @@ export default function DoctorPrescriptions() {
           <motion.h1 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-4xl font-black text-slate-900 tracking-tight"
+            className="text-4xl font-black text-foreground tracking-tight"
           >
             Medical <span className="text-primary italic">Prescriptions</span> 💊
           </motion.h1>
-          <p className="text-slate-500 font-medium mt-2">Issue structured pharmaceutical records for completed consultations.</p>
+          <p className="text-muted-foreground font-medium mt-2">Issue structured pharmaceutical records for completed consultations.</p>
         </header>
 
-        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+              <tr className="bg-muted text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">
                 <th className="p-8">Patient Identity</th>
                 <th className="p-8">Interaction Date</th>
                 <th className="p-8">Status</th>
                 <th className="p-8 text-right">Clinical Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 text-sm">
+            <tbody className="divide-y divide-border text-base">
               {appointments?.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="p-20 text-center">
@@ -143,7 +143,7 @@ export default function DoctorPrescriptions() {
                   return (
                     <motion.tr 
                       key={appt._id} 
-                      className="group hover:bg-slate-50/50 transition-colors"
+                      className="group hover:bg-muted/30 transition-colors"
                     >
                       <td className="p-8">
                         <div className="flex items-center gap-5">
@@ -151,18 +151,18 @@ export default function DoctorPrescriptions() {
                             {appt.patientId?.fullName?.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-black text-slate-900">{appt.patientId?.fullName}</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{appt.patientId?.email}</p>
+                            <p className="font-black text-foreground">{appt.patientId?.fullName}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground tracking-widest">{appt.patientId?.email?.toLowerCase()}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-8 font-bold text-slate-700">
+                      <td className="p-8 font-bold text-foreground">
                         {new Date(appt.date).toLocaleDateString()}
                       </td>
                       <td className="p-8">
                         <span className={`text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-widest ${
-                          appt.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 
-                          appt.status === 'approved' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
+                          appt.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : 
+                          appt.status === 'approved' ? 'bg-blue-500/10 text-blue-500' : 'bg-muted text-muted-foreground'
                         }`}>
                           {appt.status}
                         </span>
@@ -174,23 +174,23 @@ export default function DoctorPrescriptions() {
                               <span>
                                 <Dialog open={selectedAppt?._id === appt._id} onOpenChange={(open) => !open && setSelectedAppt(null)}>
                                   <DialogTrigger asChild>
-                                    <Button 
-                                      disabled={!isCompleted}
-                                      onClick={() => setSelectedAppt(appt)}
-                                      className="rounded-2xl h-12 px-6 bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-200 font-black uppercase text-[10px] tracking-widest gap-2 disabled:opacity-30"
-                                    >
+                                      <Button 
+                                        disabled={!isCompleted}
+                                        onClick={() => setSelectedAppt(appt)}
+                                        className="rounded-2xl h-12 px-6 bg-foreground dark:bg-slate-800 hover:bg-foreground/90 dark:hover:bg-slate-700 text-background dark:text-foreground shadow-xl shadow-primary/5 font-black uppercase text-[10px] tracking-widest gap-2 disabled:opacity-60"
+                                      >
                                       <Plus className="w-4 h-4" /> Prescribe
                                     </Button>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl rounded-[3rem] border-none p-10 overflow-y-auto max-h-[90vh]">
+                                  <DialogContent className="max-w-4xl rounded-[3rem] border-border bg-card p-10 overflow-y-auto max-h-[90vh]">
                                     <DialogHeader className="mb-8">
                                       <div className="flex items-center gap-6">
                                         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
                                           <Pill className="w-8 h-8 text-primary" />
                                         </div>
                                         <div>
-                                            <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Standardized Prescription</DialogTitle>
-                                            <DialogDescription className="text-slate-500 font-medium text-sm">
+                                            <DialogTitle className="text-2xl font-black text-foreground tracking-tight">Standardized Prescription</DialogTitle>
+                                            <DialogDescription className="text-muted-foreground font-medium text-sm">
                                               Case Ref: {appt._id.slice(-8).toUpperCase()} • Patient: {appt.patientId?.fullName}
                                             </DialogDescription>
                                         </div>
@@ -199,8 +199,8 @@ export default function DoctorPrescriptions() {
 
                                     <div className="space-y-8">
                                       <div className="space-y-6">
-                                        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                                          <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400">Medication Schedule</Label>
+                                        <div className="flex items-center justify-between border-b border-border pb-4">
+                                          <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Medication Schedule</Label>
                                           <Button onClick={addMedicine} variant="outline" className="rounded-xl h-10 px-4 text-primary font-black uppercase text-[10px] tracking-widest gap-2 bg-primary/5 border-primary/10 hover:bg-primary/10">
                                             <Plus className="w-4 h-4" /> Add Next Medicine
                                           </Button>
@@ -221,12 +221,12 @@ export default function DoctorPrescriptions() {
                                       </div>
 
                                       <div className="space-y-3">
-                                        <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1 italic">Clinical Summary / Advice</Label>
+                                        <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1 italic">Clinical Summary / Advice</Label>
                                         <Textarea 
                                           placeholder="Enter dietary restrictions, resting period, or specific follow-up instructions..." 
                                           value={generalNotes}
                                           onChange={(e) => setGeneralNotes(e.target.value)}
-                                          className="rounded-3xl border-slate-100 bg-slate-50 min-h-[100px] p-6 font-medium text-slate-700 focus:bg-white transition-all shadow-inner"
+                                          className="rounded-3xl border-border bg-muted/30 min-h-[100px] p-6 font-medium text-foreground focus:bg-background transition-all shadow-inner"
                                         />
                                       </div>
                                     </div>
@@ -234,7 +234,7 @@ export default function DoctorPrescriptions() {
                                     <DialogFooter className="mt-10">
                                       <Button 
                                         onClick={() => prescribeMutation.mutate()}
-                                        disabled={prescribeMutation.isPending || medicines.some(m => !m.name)}
+                                        disabled={prescribeMutation.isPending || medicines.some(m => !m.name || m.name.toLowerCase() === 'none')}
                                         className="w-full h-16 rounded-2xl bg-primary text-white hover:bg-primary/90 transition-all font-black text-base shadow-2xl shadow-primary/20"
                                       >
                                         {prescribeMutation.isPending ? "Validating & Transmitting..." : "Generate Prescription & Commit Records"}
@@ -245,7 +245,7 @@ export default function DoctorPrescriptions() {
                               </span>
                             </TooltipTrigger>
                             {!isCompleted && (
-                              <TooltipContent className="bg-slate-900 text-white border-none rounded-xl px-4 py-2 text-xs font-bold">
+                              <TooltipContent className="bg-foreground text-background border-none rounded-xl px-4 py-2 text-xs font-bold">
                                 Prescription can only be added after appointment is completed
                               </TooltipContent>
                             )}
@@ -306,11 +306,11 @@ function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-8 bg-slate-50/50 rounded-[2.5rem] border border-slate-100 space-y-8 relative group"
+      className="p-8 bg-muted/40 rounded-[2.5rem] border border-border space-y-8 relative group"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-3 relative z-20">
-          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Substance Name</Label>
+          <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Substance Name</Label>
           <Input 
             placeholder="e.g. Paracetamol" 
             value={med.name} 
@@ -320,17 +320,17 @@ function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
             }}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            className="h-14 rounded-2xl bg-white border-slate-100 font-bold focus:ring-primary/20 shadow-sm"
+            className="h-14 rounded-2xl bg-background border-border font-bold focus:ring-primary/20 shadow-sm"
           />
           {showSuggestions && (suggestions.length > 0 || isSearching) && (
-            <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white shadow-xl rounded-2xl border border-slate-100 max-h-48 overflow-y-auto z-50 p-2">
+            <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-card shadow-xl rounded-2xl border border-border max-h-48 overflow-y-auto z-50 p-2">
               {isSearching ? (
-                <div className="p-3 text-xs text-slate-400 font-bold text-center">Searching OpenFDA...</div>
+                <div className="p-3 text-xs text-muted-foreground font-bold text-center">Searching OpenFDA...</div>
               ) : (
                 suggestions.map((s, i) => (
                   <div 
                     key={i} 
-                    className="px-4 py-3 hover:bg-primary/5 cursor-pointer rounded-xl text-sm font-bold text-slate-700 transition-colors"
+                    className="px-4 py-3 hover:bg-primary/5 cursor-pointer rounded-xl text-sm font-bold text-foreground transition-colors"
                     onClick={() => {
                       updateMedicine(idx, 'name', s);
                       setShowSuggestions(false);
@@ -345,45 +345,45 @@ function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
         </div>
         
         <div className="space-y-3">
-          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Quantity (Units)</Label>
+          <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Quantity (Units)</Label>
           <Input 
             placeholder="e.g. 10 Tablets" 
             value={med.quantity || ""} 
             onChange={(e) => updateMedicine(idx, 'quantity', e.target.value)}
-            className="h-14 rounded-2xl bg-white border-slate-100 font-bold focus:ring-primary/20 shadow-sm"
+            className="h-14 rounded-2xl bg-background border-border font-bold focus:ring-primary/20 shadow-sm"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 z-10 relative">
         <div className="space-y-3">
-          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Dosage Frequency</Label>
-          <div className="flex items-center gap-6 h-14 bg-white/50 px-4 rounded-2xl border border-slate-100">
+          <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Dosage Frequency</Label>
+          <div className="flex items-center gap-6 h-14 bg-background/50 px-4 rounded-2xl border border-border">
             {['morning', 'noon', 'evening'].map(time => (
               <div key={time} className="flex items-center gap-2">
                 <Checkbox 
                   id={`med-${idx}-${time}`}
                   checked={med.dosage[time]}
                   onCheckedChange={(val) => updateMedicine(idx, `dosage.${time}`, val)}
-                  className="rounded-md border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="rounded-md border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
-                <Label htmlFor={`med-${idx}-${time}`} className="text-xs font-bold text-slate-600 capitalize">{time}</Label>
+                <Label htmlFor={`med-${idx}-${time}`} className="text-xs font-bold text-muted-foreground capitalize">{time}</Label>
               </div>
             ))}
           </div>
         </div>
 
         <div className="space-y-3">
-          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Consumption Timing</Label>
+          <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Consumption Timing</Label>
           <RadioGroup 
             value={med.mealTiming} 
             onValueChange={(val) => updateMedicine(idx, 'mealTiming', val)}
-            className="flex items-center gap-8 h-14 bg-white/50 px-6 rounded-2xl border border-slate-100"
+            className="flex items-center gap-8 h-14 bg-background/50 px-6 rounded-2xl border border-border"
           >
             {['Before Meal', 'After Meal'].map(val => (
               <div key={val} className="flex items-center gap-2">
-                <RadioGroupItem value={val} id={`meal-${idx}-${val}`} className="text-primary border-slate-300" />
-                <Label htmlFor={`meal-${idx}-${val}`} className="text-xs font-bold text-slate-600">{val}</Label>
+                <RadioGroupItem value={val} id={`meal-${idx}-${val}`} className="text-primary border-border" />
+                <Label htmlFor={`meal-${idx}-${val}`} className="text-xs font-bold text-muted-foreground">{val}</Label>
               </div>
             ))}
           </RadioGroup>
@@ -391,12 +391,12 @@ function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
       </div>
 
       <div className="space-y-3">
-        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Additional Guidance (Optional)</Label>
+        <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Additional Guidance (Optional)</Label>
         <Input 
           placeholder="e.g. Swallow with warm water" 
           value={med.description} 
           onChange={(e) => updateMedicine(idx, 'description', e.target.value)}
-          className="h-14 rounded-2xl bg-white border-slate-100 font-bold focus:ring-primary/20 shadow-sm"
+          className="h-14 rounded-2xl bg-background border-border font-bold focus:ring-primary/20 shadow-sm"
         />
       </div>
 
@@ -405,7 +405,7 @@ function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
           variant="ghost" 
           size="icon" 
           onClick={() => removeMedicine(idx)} 
-          className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-slate-300 hover:text-red-500 shadow-lg border border-slate-100 opacity-0 group-hover:opacity-100 transition-all"
+          className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-card text-muted-foreground hover:text-destructive shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-all font-black"
         >
           <Trash2 className="w-4 h-4" />
         </Button>

@@ -13,6 +13,7 @@ import http from 'http';
 import chatRoutes from './routes/chat.js';
 import prescriptionRoutes from './routes/prescriptions.js';
 import adminRoutes from './routes/admin.js';
+import contactRoutes from './routes/contact.js';
 
 dotenv.config();
 
@@ -39,21 +40,19 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Socket.IO logic
 const users = {}; // Map socketId to userId
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
 
   socket.on('register_user', (userId) => {
     users[userId] = socket.id;
-    console.log(`User ${userId} registered with socket ${socket.id}`);
   });
 
   socket.on('join_chat', (chatId) => {
     socket.join(chatId);
-    console.log(`User joined chat room: ${chatId}`);
   });
 
   socket.on('send_message', (data) => {
@@ -118,7 +117,7 @@ app.get('/', (req, res) => {
 
 // MongoDB Connection
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/care-companion';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 mongoose.connect(MONGODB_URI)
   .then(() => {

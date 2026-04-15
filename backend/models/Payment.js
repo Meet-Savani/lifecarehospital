@@ -11,7 +11,6 @@ const paymentSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-paymentSchema.index({ appointmentId: 1 });
 paymentSchema.index({ patientId: 1 });
 
 export default mongoose.model('Payment', paymentSchema);

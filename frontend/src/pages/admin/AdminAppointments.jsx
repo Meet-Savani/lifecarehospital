@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Clock } from "lucide-react";
 import { generatePrescriptionPDF, generateInvoicePDF } from "@/utils/pdfGenerators";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -66,82 +66,88 @@ export default function AdminAppointments() {
   return (
     <DashboardLayout role="admin">
       <h1 className="text-2xl font-bold text-foreground mb-6">Appointment Management</h1>
-      <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
+      <div className="bg-card rounded-[2.5rem] border border-border shadow-2xl shadow-primary/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Patient Name</th>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Doctor Name</th>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Date & Time</th>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Appointment Status</th>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Actions</th>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">Payment Status</th>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">View Invoice</th>
-                <th className="text-left p-4 font-bold text-muted-foreground uppercase text-xs">View Prescription</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Patient Identity</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Clinical Lead</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Session Data</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Current Status</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Direct Actions</th>
+                <th className="text-left p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Finance</th>
+                <th className="text-center p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Financial Log</th>
+                <th className="text-center p-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Prescription</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {apptLoading && <tr><td colSpan={7} className="p-4 text-center">Loading...</td></tr>}
+              {apptLoading && <tr><td colSpan={8} className="p-20 text-center uppercase font-black tracking-widest text-muted-foreground">Syncing Appointments...</td></tr>}
               {appointments?.map((a) => {
                 const presc = prescriptions?.find(p => p.appointmentId?._id === a._id);
 
                 return (
-                  <tr key={a._id} className="hover:bg-accent/50 transition-colors">
-                    <td className="p-4 font-bold text-foreground">{a.patientId?.fullName || "Patient"}</td>
-                    <td className="p-4 font-bold text-primary">Dr. {a.doctorId?.userId?.fullName || "Doctor"}</td>
-                    <td className="p-4">
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{new Date(a.date).toLocaleDateString()}</span>
-                        <span className="text-xs text-muted-foreground">{a.time}</span>
+                  <tr key={a._id} className="hover:bg-muted/30 transition-colors group">
+                    <td className="p-6 font-black text-foreground tracking-tight text-base">{a.patientId?.fullName || "Patient"}</td>
+                    <td className="p-6">
+                       <span className="font-bold text-primary bg-primary/5 px-3 py-1 rounded-lg">Dr. {a.doctorId?.userId?.fullName || "Doctor"}</span>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-foreground">{new Date(a.date).toLocaleDateString()}</span>
+                        <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1.5"><Clock className="w-3 h-3" /> {a.time}</span>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-widest uppercase ${
-                        a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
-                        a.status === "rejected" ? "bg-red-500/10 text-red-600" :
-                        a.status === "completed" ? "bg-blue-500/10 text-blue-600" :
-                        "bg-amber-500/10 text-amber-600"
+                    <td className="p-6">
+                      <span className={`text-[10px] px-3 py-1 rounded-full font-black tracking-[0.1em] shadow-sm uppercase ${
+                        a.status === "approved" ? "bg-emerald-500 text-white" :
+                        a.status === "rejected" ? "bg-destructive text-white" :
+                        a.status === "completed" ? "bg-green-400 text-white" :
+                        "bg-amber-500 text-white"
                       }`}>
                         {a.status === "pending_reschedule" ? "PENDING" : a.status}
                       </span>
                     </td>
-                    <td className="p-4">
+                    <td className="p-6">
                       {a.status === 'pending' || a.status === 'pending_reschedule' ? (
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => updateStatus(a._id, 'approved')} className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] h-7 px-2">Approve</Button>
-                          <Button size="sm" onClick={() => updateStatus(a._id, 'rejected')} variant="destructive" className="text-[10px] h-7 px-2">Reject</Button>
+                          <Button size="sm" onClick={() => updateStatus(a._id, 'approved')} className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase h-9 px-4 rounded-xl shadow-lg shadow-emerald-500/10">Approve</Button>
+                          <Button size="sm" onClick={() => updateStatus(a._id, 'rejected')} variant="destructive" className="text-[10px] font-black uppercase h-9 px-4 rounded-xl shadow-lg shadow-destructive/10">Reject</Button>
                         </div>
                       ) : a.status === 'approved' ? (
-                        <Button size="sm" onClick={() => updateStatus(a._id, 'completed')} className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] h-7 px-2 w-full">Complete</Button>
+                        <Button size="sm" onClick={() => updateStatus(a._id, 'completed')} className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-black uppercase h-9 px-6 rounded-xl w-full shadow-lg shadow-blue-500/10">Complete</Button>
                       ) : (
-                        <span className="text-xs text-muted-foreground font-medium flex items-center justify-center">-</span>
+                        <span className="text-xs text-muted-foreground font-black tracking-widest flex justify-center">—</span>
                       )}
                     </td>
-                    <td className="p-4">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                        a.isPaid ? "bg-emerald-500/10 text-emerald-600" : "bg-warning/10 text-warning"
+                    <td className="p-6">
+                      <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-sm ${
+                        a.isPaid ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
                       }`}>
-                        {a.isPaid ? 'Paid' : 'Not Paid'}
+                        {a.isPaid ? 'Settled' : 'Pending'}
                       </span>
                     </td>
-                    <td className="p-4">
-                      {a.isPaid ? (
-                        <Button size="sm" variant="outline" className="h-7 text-[10px] px-2 text-slate-600" onClick={() => exportInvoice(a)}>
-                          <FileText className="w-3 h-3 mr-1" /> View Invoice
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                    <td className="p-6 text-center">
+                      <div className="flex justify-center">
+                        {a.isPaid ? (
+                          <Button size="sm" variant="outline" className="h-9 text-[10px] px-4 rounded-xl border-border bg-card hover:bg-primary/5 text-foreground font-black uppercase tracking-widest transition-all shadow-sm" onClick={() => exportInvoice(a)}>
+                            <FileText className="w-3.5 h-3.5 mr-2 text-primary" /> View Invoice
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground font-black">—</span>
+                        )}
+                      </div>
                     </td>
-                    <td className="p-4">
-                      {presc && a.isPaid ? (
-                        <Button size="sm" variant="outline" className="h-7 text-[10px] px-2 text-primary" onClick={() => exportPDF(presc)}>
-                          <Download className="w-3 h-3 mr-1" /> View Prescription
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                    <td className="p-6 text-center">
+                      <div className="flex justify-center">
+                        {presc && a.isPaid ? (
+                          <Button size="sm" variant="outline" className="h-9 text-[10px] px-4 rounded-xl border-border bg-card hover:bg-primary/5 text-primary font-black uppercase tracking-widest transition-all shadow-sm" onClick={() => exportPDF(presc)}>
+                            <Download className="w-3.5 h-3.5 mr-2" /> View Prescription
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground font-black">—</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
