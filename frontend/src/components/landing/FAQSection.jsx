@@ -5,10 +5,10 @@ import { HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 const fallbackFaq = [
-  { id: "1", question: "How do I book an appointment?", answer: "You can book an appointment by registering on our platform, choosing a specialty, and selecting your preferred doctor and time slot." },
-  { id: "2", question: "What are the visiting hours?", answer: "Visiting hours are from 10 AM to 8 PM daily. For special units like ICU, visiting is restricted to specific hours for patient safety." },
-  { id: "3", question: "Do you accept insurance?", answer: "Yes, we accept most major insurance providers and government health schemes. Please consult our billing desk for specific details." },
-  { id: "4", question: "Is emergency care available 24/7?", answer: "Yes, our emergency and trauma department operates 24 hours a day, 7 days a week, with specialist teams on standby." },
+  { id: "1", question: "What specialties does Lifecare Hospital provide?", answer: "We specialize in above-the-neck super specialty care, including ENT, Neurology, Neurosurgery, Oncosurgery, Ophthalmology, Dental Sciences, Dermatology, Plastic Surgery, Psychiatry, and Pulmonary medicine." },
+  { id: "2", question: "How can I book an appointment?", answer: "Appointments can be booked easily through Call on our helpline number or Visiting the hospital reception directly." },
+  { id: "3", question: "Do the hospital provides emergency services?", answer: "Yes, Lifecare Hospital offers 24x7 emergency care with specialized ICU support, neurosurgery backup, and ambulance facilities." },
+  { id: "4", question: "Does Lifecare Hospital accept health insurance?", answer: "Yes, we work with a wide range of health insurance providers and TPAs. Our billing team assists patients with claims and cashless hospitalization." },
 ];
 
 const dropIn = {

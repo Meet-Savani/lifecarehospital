@@ -12,5 +12,7 @@ const paymentSchema = new mongoose.Schema({
 });
 
 paymentSchema.index({ patientId: 1 });
+paymentSchema.index({ doctorId: 1 });
+paymentSchema.index({ createdAt: -1 });
 
 export default mongoose.model('Payment', paymentSchema);

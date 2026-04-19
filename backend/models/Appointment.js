@@ -22,5 +22,7 @@ appointmentSchema.index({ patientId: 1 });
 appointmentSchema.index({ doctorId: 1 });
 appointmentSchema.index({ date: 1 });
 appointmentSchema.index({ status: 1 });
+appointmentSchema.index({ doctorId: 1, date: 1, status: 1 }); // compound index for booked slots
+appointmentSchema.index({ createdAt: -1 }); // for sorted admin queries
 
 export default mongoose.model('Appointment', appointmentSchema);

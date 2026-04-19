@@ -13,7 +13,7 @@ export const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id);
+    req.user = await User.findById(decoded.id).select('-password -healthMetrics.history').lean();
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Not authorized to access this route' });

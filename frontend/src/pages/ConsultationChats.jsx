@@ -18,6 +18,84 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import socket from "@/utils/socket";
 
+const downloadFile = (url, name) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name || "download";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const MessageBubble = ({ m, isMe, onSelectMedia, onDownload }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      className={`flex ${isMe ? "justify-end" : "justify-start"} mb-6 relative group`}
+    >
+      <div className={`max-w-[85%] md:max-w-[70%] transition-colors duration-300 p-5 relative border ${
+        isMe 
+          ? "bg-primary text-primary-foreground rounded-t-[2rem] rounded-bl-[2rem] shadow-lg shadow-primary/10 border-primary" 
+          : "bg-card text-foreground rounded-t-[2rem] rounded-br-[2rem] border-border shadow-sm"
+      }`}>
+        {m.type === "text" && <p className="text-sm font-medium leading-relaxed">{m.message}</p>}
+        
+        {m.type === "image" && (
+          <div className="space-y-3">
+            <div className="relative rounded-2xl overflow-hidden cursor-zoom-in group/img border border-border/50" onClick={() => onSelectMedia(m)}>
+              <img src={m.fileUrl} alt="sent" className="w-full max-h-80 object-cover hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                <Maximize2 className="text-white w-8 h-8" />
+              </div>
+            </div>
+            <Button variant="outline" size="sm" className={`w-full rounded-xl text-xs h-10 ${isMe ? "bg-white/10 text-white hover:bg-white/20 border-white/20" : "bg-muted text-foreground hover:bg-muted/80 border-border"}`} onClick={() => onDownload(m.fileUrl, m.fileName)}>
+              <Download className="w-4 h-4 mr-2" /> Save Image
+            </Button>
+          </div>
+        )}
+
+        {m.type === "video" && (
+          <div className="space-y-3 min-w-[280px]">
+            <video controls className="w-full rounded-2xl bg-black shadow-lg">
+              <source src={m.fileUrl} />
+            </video>
+            <Button variant="outline" size="sm" className={`w-full rounded-xl text-xs h-10 ${isMe ? "bg-white/10 text-white hover:bg-white/20 border-white/20" : "bg-muted text-foreground hover:bg-muted/80 border-border"}`} onClick={() => onDownload(m.fileUrl, m.fileName)}>
+              <Download className="w-4 h-4 mr-2" /> Save Video
+            </Button>
+          </div>
+        )}
+
+        {m.type === "pdf" && (
+          <div className={`flex flex-col gap-4 p-4 rounded-2xl border ${isMe ? "bg-white/10 border-white/20" : "bg-muted/50 border-border"}`}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-destructive flex items-center justify-center text-destructive-foreground shadow-lg">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`font-bold text-sm truncate ${isMe ? "text-white" : "text-foreground"}`}>{m.fileName || "document.pdf"}</p>
+                <p className={`text-[10px] uppercase font-black tracking-widest ${isMe ? "text-white/60" : "text-muted-foreground"}`}>PDF Document</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button size="sm" variant="ghost" className={`rounded-xl h-10 text-xs font-bold gap-2 ${isMe ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted"}`} onClick={() => window.open(m.fileUrl, '_blank')}>
+                <Maximize2 className="w-4 h-4" /> Open
+              </Button>
+              <Button size="sm" className="rounded-xl h-10 text-xs font-bold gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-none shadow-none" onClick={() => onDownload(m.fileUrl, m.fileName)}>
+                <Download className="w-4 h-4" /> Save
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <span className={`text-[9px] font-black uppercase tracking-widest mt-2 block opacity-80 ${isMe ? "text-right text-white/80" : "text-left text-slate-400"}`}>
+          {format(new Date(m.createdAt), 'hh:mm a')}
+        </span>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function ConsultationChats() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -183,14 +261,7 @@ export default function ConsultationChats() {
     }
   };
 
-  const downloadFile = (url, name) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = name || "download";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+
 
   const filteredChats = chats?.filter(chat => {
     const other = chat.participants.find(p => p._id !== user?._id);
@@ -201,75 +272,7 @@ export default function ConsultationChats() {
 
   const totalUnread = chats?.reduce((acc, chat) => acc + (chat.unreadCount || 0), 0) || 0;
 
-  const MessageBubble = ({ m }) => {
-    const isMe = m.senderId === user?._id;
-    return (
-      <motion.div 
-        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className={`flex ${isMe ? "justify-end" : "justify-start"} mb-6 relative group`}
-      >
-        <div className={`max-w-[85%] md:max-w-[70%] transition-colors duration-300 p-5 relative border ${
-          isMe 
-            ? "bg-primary text-primary-foreground rounded-t-[2rem] rounded-bl-[2rem] shadow-lg shadow-primary/10 border-primary" 
-            : "bg-card text-foreground rounded-t-[2rem] rounded-br-[2rem] border-border shadow-sm"
-        }`}>
-          {m.type === "text" && <p className="text-sm font-medium leading-relaxed">{m.message}</p>}
-          
-          {m.type === "image" && (
-            <div className="space-y-3">
-              <div className="relative rounded-2xl overflow-hidden cursor-zoom-in group/img border border-border/50" onClick={() => setSelectedMedia(m)}>
-                <img src={m.fileUrl} alt="sent" className="w-full max-h-80 object-cover hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                  <Maximize2 className="text-white w-8 h-8" />
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className={`w-full rounded-xl text-xs h-10 ${isMe ? "bg-white/10 text-white hover:bg-white/20 border-white/20" : "bg-muted text-foreground hover:bg-muted/80 border-border"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                <Download className="w-4 h-4 mr-2" /> Save Image
-              </Button>
-            </div>
-          )}
 
-          {m.type === "video" && (
-            <div className="space-y-3 min-w-[280px]">
-              <video controls className="w-full rounded-2xl bg-black shadow-lg">
-                <source src={m.fileUrl} />
-              </video>
-              <Button variant="outline" size="sm" className={`w-full rounded-xl text-xs h-10 ${isMe ? "bg-white/10 text-white hover:bg-white/20 border-white/20" : "bg-muted text-foreground hover:bg-muted/80 border-border"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                <Download className="w-4 h-4 mr-2" /> Save Video
-              </Button>
-            </div>
-          )}
-
-          {m.type === "pdf" && (
-            <div className={`flex flex-col gap-4 p-4 rounded-2xl border ${isMe ? "bg-white/10 border-white/20" : "bg-muted/50 border-border"}`}>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-destructive flex items-center justify-center text-destructive-foreground shadow-lg">
-                  <FileText className="w-6 h-6" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`font-bold text-sm truncate ${isMe ? "text-white" : "text-foreground"}`}>{m.fileName || "document.pdf"}</p>
-                  <p className={`text-[10px] uppercase font-black tracking-widest ${isMe ? "text-white/60" : "text-muted-foreground"}`}>PDF Document</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button size="sm" variant="ghost" className={`rounded-xl h-10 text-xs font-bold gap-2 ${isMe ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted"}`} onClick={() => window.open(m.fileUrl, '_blank')}>
-                  <Maximize2 className="w-4 h-4" /> Open
-                </Button>
-                <Button size="sm" className="rounded-xl h-10 text-xs font-bold gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-none shadow-none" onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                  <Download className="w-4 h-4" /> Save
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <span className={`text-[9px] font-black uppercase tracking-widest mt-2 block opacity-80 ${isMe ? "text-right text-white/80" : "text-left text-slate-400"}`}>
-            {format(new Date(m.createdAt), 'hh:mm a')}
-          </span>
-        </div>
-      </motion.div>
-    );
-  };
 
   return (
     <DashboardLayout role={user?.role}>
@@ -395,7 +398,7 @@ export default function ConsultationChats() {
               {/* Chat Body */}
               <div className="flex-1 overflow-y-auto px-6 py-8 bg-muted/20 custom-scrollbar">
                  <AnimatePresence>
-                   {messages.map((m, i) => <MessageBubble key={m._id || `msg-${i}`} m={m} />)}
+                   {messages.map((m, i) => <MessageBubble key={m._id || `msg-${i}`} m={m} isMe={m.senderId === user?._id} onSelectMedia={setSelectedMedia} onDownload={downloadFile} />)}
                  </AnimatePresence>
                  <div ref={scrollRef} className="h-4" />
               </div>

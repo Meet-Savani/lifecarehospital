@@ -157,13 +157,19 @@ export default function DoctorAppointments() {
                         a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
                         a.status === "rejected" ? "bg-red-500/10 text-red-600" :
                         a.status === "completed" ? "bg-green-400/10 text-green-600" :
+                        a.status === "pending_reschedule" ? "bg-violet-500/10 text-violet-600" :
                         "bg-amber-500/10 text-amber-600"
                       }`}>
-                        {a.status === "pending_reschedule" ? "PENDING" : a.status}
+                        {a.status === "pending_reschedule" ? "RESCHEDULE REQUEST" : a.status}
                       </span>
                     </td>
                     <td className="p-4">
-                      {a.status === 'pending' || a.status === 'pending_reschedule' ? (
+                      {a.status === 'pending_reschedule' ? (
+                        <div className="flex gap-2 flex-col xl:flex-row">
+                          <Button size="sm" onClick={() => updateStatus(a._id, 'approved')} className="bg-violet-500 hover:bg-violet-600 text-white text-[10px] h-7 px-2">Approve Reschedule</Button>
+                          <Button size="sm" onClick={() => updateStatus(a._id, 'rejected')} variant="destructive" className="text-[10px] h-7 px-2">Reject</Button>
+                        </div>
+                      ) : a.status === 'pending' ? (
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => updateStatus(a._id, 'approved')} className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] h-7 px-2">Approve</Button>
                           <Button size="sm" onClick={() => updateStatus(a._id, 'rejected')} variant="destructive" className="text-[10px] h-7 px-2">Reject</Button>

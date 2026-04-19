@@ -31,6 +31,87 @@ const socket = io(import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || "htt
   autoConnect: true
 });
 
+const downloadFile = (url, name) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name || "download";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const MessageBubble = ({ m, isMe, alignRight, sender, otherParticipant, userRole, onSelectMedia, onDownload }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      className={`flex ${alignRight ? "justify-end" : "justify-start"} mb-6 relative group`}
+    >
+      <div className={`max-w-[85%] md:max-w-[70%] transition-colors duration-300 ${
+        alignRight 
+          ? "bg-primary text-primary-foreground rounded-t-[2rem] rounded-bl-[2rem] shadow-lg shadow-primary/10" 
+          : "bg-card text-foreground rounded-t-[2rem] rounded-br-[2rem] border border-border shadow-sm"
+      } p-5 relative`}>
+         <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-2 opacity-80 ${alignRight ? "text-right" : "text-left"}`}>
+           {userRole === 'admin' ? `${sender?.fullName || 'Participant'} (${sender?.role || 'Unknown'})` : isMe ? "Sent by You" : `${otherParticipant?.fullName || "Recipient"}`}
+         </p>
+         
+         {m.type === "text" && <p className="text-sm md:text-base font-medium leading-relaxed">{m.message}</p>}
+         
+         {m.type === "image" && (
+           <div className="space-y-3">
+             <div className="relative rounded-2xl overflow-hidden cursor-zoom-in group/img border border-border/50" onClick={() => onSelectMedia(m)}>
+               <img src={m.fileUrl} alt="sent" className="w-full max-h-80 object-cover hover:scale-105 transition-transform duration-500" />
+               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                  <Maximize2 className="text-white w-8 h-8" />
+               </div>
+             </div>
+              <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20" : "bg-muted text-foreground hover:bg-muted/80"}`} onClick={() => onDownload(m.fileUrl, m.fileName)}>
+                <Download className="w-4 h-4 mr-2" /> Download Image
+              </Button>
+           </div>
+         )}
+
+         {m.type === "video" && (
+           <div className="space-y-3 min-w-[300px]">
+             <video controls className="w-full rounded-2xl bg-black shadow-2xl">
+               <source src={m.fileUrl} />
+             </video>
+              <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20" : "bg-muted text-foreground hover:bg-muted/80"}`} onClick={() => onDownload(m.fileUrl, m.fileName)}>
+                <Download className="w-4 h-4 mr-2" /> Download Video
+              </Button>
+           </div>
+         )}
+
+          {m.type === "pdf" && (
+           <div className={`flex flex-col gap-4 p-4 rounded-2xl border ${alignRight ? "bg-primary-foreground/10 border-primary-foreground/20" : "bg-muted/30 border-border"}`}>
+             <div className="flex items-center gap-4">
+               <div className="w-12 h-12 rounded-xl bg-destructive flex items-center justify-center text-destructive-foreground shadow-lg">
+                 <FileText className="w-6 h-6" />
+               </div>
+               <div className="flex-1 min-w-0">
+                  <p className={`font-bold text-sm truncate ${alignRight ? "text-white" : "text-foreground"}`}>{m.fileName || "document.pdf"}</p>
+                  <p className={`text-[10px] uppercase font-black tracking-widest ${alignRight ? "text-white/60" : "text-muted-foreground"}`}>PDF Document</p>
+               </div>
+             </div>
+             <div className="grid grid-cols-2 gap-2">
+               <Button size="sm" variant="ghost" className={`rounded-xl h-10 text-xs font-bold gap-2 ${alignRight ? "text-primary-foreground hover:bg-primary-foreground/10" : "text-foreground hover:bg-muted"}`} onClick={() => window.open(m.fileUrl, '_blank')}>
+                 <Maximize2 className="w-4 h-4" /> Open (New Tab)
+               </Button>
+               <Button size="sm" className="rounded-xl h-10 text-xs font-bold gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-none" onClick={() => onDownload(m.fileUrl, m.fileName)}>
+                 <Download className="w-4 h-4" /> Save
+               </Button>
+             </div>
+           </div>
+         )}
+         <span className={`text-[9px] font-black uppercase opacity-80 mt-3 block ${alignRight ? "text-right" : "text-left"}`}>
+           {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+         </span>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function ChatPage() {
   const { appointmentId } = useParams();
   const { user } = useAuth();
@@ -160,90 +241,9 @@ export default function ChatPage() {
   };
 
 
-  const downloadFile = (url, name) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = name || "download";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
-  const MessageBubble = ({ m }) => {
-    const isMe = m.senderId === user?._id;
-    const sender = chat?.participants?.find(p => p._id === m.senderId);
-    const alignRight = user?.role === 'admin' ? (sender?.role === 'doctor') : isMe;
 
-    return (
-      <motion.div 
-        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className={`flex ${alignRight ? "justify-end" : "justify-start"} mb-6 relative group`}
-      >
-        <div className={`max-w-[85%] md:max-w-[70%] transition-colors duration-300 ${
-          alignRight 
-            ? "bg-primary text-primary-foreground rounded-t-[2rem] rounded-bl-[2rem] shadow-lg shadow-primary/10" 
-            : "bg-card text-foreground rounded-t-[2rem] rounded-br-[2rem] border border-border shadow-sm"
-        } p-5 relative`}>
-           <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-2 opacity-80 ${alignRight ? "text-right" : "text-left"}`}>
-             {user?.role === 'admin' ? `${sender?.fullName || 'Participant'} (${sender?.role || 'Unknown'})` : isMe ? "Sent by You" : `${otherParticipant?.fullName || "Recipient"}`}
-           </p>
-           
-           {m.type === "text" && <p className="text-sm md:text-base font-medium leading-relaxed">{m.message}</p>}
-           
-           {m.type === "image" && (
-             <div className="space-y-3">
-               <div className="relative rounded-2xl overflow-hidden cursor-zoom-in group/img border border-border/50" onClick={() => setSelectedMedia(m)}>
-                 <img src={m.fileUrl} alt="sent" className="w-full max-h-80 object-cover hover:scale-105 transition-transform duration-500" />
-                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                    <Maximize2 className="text-white w-8 h-8" />
-                 </div>
-               </div>
-                <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20" : "bg-muted text-foreground hover:bg-muted/80"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                  <Download className="w-4 h-4 mr-2" /> Download Image
-                </Button>
-             </div>
-           )}
 
-           {m.type === "video" && (
-             <div className="space-y-3 min-w-[300px]">
-               <video controls className="w-full rounded-2xl bg-black shadow-2xl">
-                 <source src={m.fileUrl} />
-               </video>
-                <Button variant="outline" size="sm" className={`w-full rounded-xl border-border/20 text-xs h-10 ${alignRight ? "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20" : "bg-muted text-foreground hover:bg-muted/80"}`} onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                  <Download className="w-4 h-4 mr-2" /> Download Video
-                </Button>
-             </div>
-           )}
-
-            {m.type === "pdf" && (
-             <div className={`flex flex-col gap-4 p-4 rounded-2xl border ${alignRight ? "bg-primary-foreground/10 border-primary-foreground/20" : "bg-muted/30 border-border"}`}>
-               <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-xl bg-destructive flex items-center justify-center text-destructive-foreground shadow-lg">
-                   <FileText className="w-6 h-6" />
-                 </div>
-                 <div className="flex-1 min-w-0">
-                    <p className={`font-bold text-sm truncate ${alignRight ? "text-white" : "text-foreground"}`}>{m.fileName || "document.pdf"}</p>
-                    <p className={`text-[10px] uppercase font-black tracking-widest ${alignRight ? "text-white/60" : "text-muted-foreground"}`}>PDF Document</p>
-                 </div>
-               </div>
-               <div className="grid grid-cols-2 gap-2">
-                 <Button size="sm" variant="ghost" className={`rounded-xl h-10 text-xs font-bold gap-2 ${alignRight ? "text-primary-foreground hover:bg-primary-foreground/10" : "text-foreground hover:bg-muted"}`} onClick={() => window.open(m.fileUrl, '_blank')}>
-                   <Maximize2 className="w-4 h-4" /> Open (New Tab)
-                 </Button>
-                 <Button size="sm" className="rounded-xl h-10 text-xs font-bold gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-none" onClick={() => downloadFile(m.fileUrl, m.fileName)}>
-                   <Download className="w-4 h-4" /> Save
-                 </Button>
-               </div>
-             </div>
-           )}
-           <span className={`text-[9px] font-black uppercase opacity-80 mt-3 block ${alignRight ? "text-right" : "text-left"}`}>
-             {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-           </span>
-        </div>
-      </motion.div>
-    );
-  };
 
   return (
     <DashboardLayout role={user?.role}>
@@ -340,7 +340,24 @@ export default function ChatPage() {
                 </p>
               </div>
             ) : (
-              messages.map((m, i) => <MessageBubble key={m._id || `msg-${i}`} m={m} />)
+              messages.map((m, i) => {
+                const isMe = m.senderId === user?._id;
+                const sender = chat?.participants?.find(p => p._id === m.senderId);
+                const alignRight = user?.role === 'admin' ? (sender?.role === 'doctor') : isMe;
+                return (
+                  <MessageBubble 
+                    key={m._id || `msg-${i}`} 
+                    m={m} 
+                    isMe={isMe}
+                    alignRight={alignRight}
+                    sender={sender}
+                    otherParticipant={otherParticipant}
+                    userRole={user?.role}
+                    onSelectMedia={setSelectedMedia}
+                    onDownload={downloadFile}
+                  />
+                );
+              })
             )}
           </AnimatePresence>
           <div ref={scrollRef} className="h-2 w-full invisible" />

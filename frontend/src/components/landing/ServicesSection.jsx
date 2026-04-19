@@ -1,26 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
-import { Heart, Brain, Bone, Baby, Eye, Stethoscope, ArrowRight } from "lucide-react";
+import { ArrowRight, Activity, Ambulance, Microscope, Pill, BedSingle, Stethoscope } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { AnimatedSectionHeader, StaggerContainer, cardVariants, buttonHoverTap } from "./AnimatedSection";
 
 const iconMap = {
-  Heart: <Heart className="h-7 w-7" />,
-  Brain: <Brain className="h-7 w-7" />,
-  Bone: <Bone className="h-7 w-7" />,
-  Baby: <Baby className="h-7 w-7" />,
-  Eye: <Eye className="h-7 w-7" />,
+  emergency: <Activity className="h-7 w-7" />,
+  ambulance: <Ambulance className="h-7 w-7" />,
+  lab: <Microscope className="h-7 w-7" />,
+  pharmacy: <Pill className="h-7 w-7" />,
+  room: <BedSingle className="h-7 w-7" />,
   Stethoscope: <Stethoscope className="h-7 w-7" />,
 };
 
 const fallbackServices = [
-  { id: "1", title: "Cardiology", description: "Advanced heart care and diagnostics using the latest technology.", icon: "Heart" },
-  { id: "2", title: "Neurology", description: "Expert brain, spine and nervous system treatment for all ages.", icon: "Brain" },
-  { id: "3", title: "Orthopedics", description: "Comprehensive bone and joint care from specialists.", icon: "Bone" },
-  { id: "4", title: "Pediatrics", description: "Compassionate child healthcare from birth through adolescence.", icon: "Baby" },
-  { id: "5", title: "Ophthalmology", description: "Premium eye care and surgical vision services.", icon: "Eye" },
-  { id: "6", title: "General Medicine", description: "Primary healthcare services for your entire family.", icon: "Stethoscope" },
+  { id: "1", title: "24x7 Emergency Care", description: "Lifecare Hospital offers 24x7 emergency care with specialized ICU support and neurosurgery backup.", icon: "emergency" },
+  { id: "2", title: "Ambulance Services", description: "Reliable ambulance services, ensuring patients get timely care when every second counts.", icon: "ambulance" },
+  { id: "3", title: "Home Sample Pickup", description: "Sample pickup at your home & give 99.8% accuracy in results.", icon: "lab" },
+  { id: "4", title: "24/7 Pharmacy", description: "Medicines at your doorsteps. Shop your medicine online from LIOHN. Essentials at your doorstep anytime in emergency situation.", icon: "pharmacy" },
+  { id: "5", title: "Private Rooms", description: "Private rooms are quieter and safer than shared rooms and better for your recovery. Every patient gets their own private room.", icon: "room" }
 ];
 
 export default function ServicesSection() {
@@ -41,14 +40,10 @@ export default function ServicesSection() {
   return (
     <section id="services" className="py-24 bg-background relative overflow-hidden">
       {/* Background decoration */}
-      <motion.div
-        animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      <div
         className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl"
       />
-      <motion.div
-        animate={{ scale: [1, 1.15, 1], opacity: [0.05, 0.08, 0.05] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+      <div
         className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full -ml-32 -mb-32 blur-3xl"
       />
 

@@ -62,19 +62,19 @@ export default function ContactSection() {
               {
                 icon: <Phone className="h-5 w-5" />,
                 title: "Phone",
-                lines: ["+91 91043 23400", "079-35096700"],
+                lines: ["079-35096700", "Emergency: 079-35096700"],
               },
               {
                 icon: <Mail className="h-5 w-5" />,
                 title: "Email",
-                lines: ["info@liohns.com", "liohnshospital748@gmail.com"],
+                lines: ["liohnshospital748@gmail.com"],
               },
               {
                 icon: <MapPin className="h-5 w-5" />,
                 title: "Address",
                 lines: [
-                  "Sarva Mangal Hall, Besides Swami Vivekananda Road",
-                  "Chowk, Memnagar, Ahmedabad, Gujarat 380052",
+                  "Beside Sarva Mangal Hall, Near swami vivekanand Chowk",
+                  "Memnagar, Ahmedabad- 380052",
                 ],
               },
             ].map((item, i) => (

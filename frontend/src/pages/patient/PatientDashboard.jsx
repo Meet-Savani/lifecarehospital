@@ -11,24 +11,11 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const healthData = [
-  { name: 'Mon', value: 72 },
-  { name: 'Tue', value: 75 },
-  { name: 'Wed', value: 68 },
-  { name: 'Thu', value: 80 },
-  { name: 'Fri', value: 74 },
-  { name: 'Sat', value: 70 },
-  { name: 'Sun', value: 72 },
-];
-
-const monthHealthData = [
-  { name: 'Day 1', value: 71 }, { name: 'Day 5', value: 74 }, { name: 'Day 10', value: 68 }, { name: 'Day 15', value: 79 }, { name: 'Day 20', value: 73 }, { name: 'Day 25', value: 70 }, { name: 'Day 30', value: 72 }
-];
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function PatientDashboard() {
   const { user } = useAuth();
+  
   const { data: appointments, isLoading } = useQuery({
     queryKey: ["patient-recent-appointments", user?._id],
     queryFn: async () => {
@@ -40,19 +27,36 @@ export default function PatientDashboard() {
 
   const upcoming = appointments?.filter(a => ['pending', 'approved', 'pending_reschedule'].includes(a.status)) || [];
 
-  const [chartRange, setChartRange] = useState('week');
-  const [dynamicHealthData, setDynamicHealthData] = useState(healthData);
-
-  useEffect(() => {
-    if (user?.healthMetrics?.heartRate) {
-      const base = user.healthMetrics.heartRate;
-      const updated = healthData.map(d => ({
-        ...d,
-        value: base + Math.floor(Math.random() * 10) - 5
-      }));
-      setDynamicHealthData(updated);
+  const getConsultationData = () => {
+    if (!appointments) return [];
+    const months = [];
+    const now = new Date();
+    // Build array for last 6 months
+    for(let i=5; i>=0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ 
+        name: d.toLocaleString('default', { month: 'short' }), 
+        yearKey: d.getFullYear(),
+        monthKey: d.getMonth(),
+        visits: 0 
+      });
     }
-  }, [user]);
+
+    appointments.forEach(a => {
+      // Just track all appointments that actually happened/happening
+      if (a.status !== 'rejected') {
+        const ad = new Date(a.date);
+        const target = months.find(m => m.yearKey === ad.getFullYear() && m.monthKey === ad.getMonth());
+        if (target) {
+          target.visits += 1;
+        }
+      }
+    });
+
+    return months.map(m => ({ name: m.name, visits: m.visits }));
+  };
+
+  const chartData = getConsultationData();
 
   const stats = [
     { label: "Heart Rate", value: `${user?.healthMetrics?.heartRate || 72} bpm`, icon: Heart, color: "text-red-500", bg: "bg-red-500/10", trend: "+2%" },
@@ -61,7 +65,7 @@ export default function PatientDashboard() {
     { label: "Blood Pressure", value: user?.healthMetrics?.bloodPressure || "120/80", icon: Activity, color: "text-emerald-500", bg: "bg-emerald-500/10", trend: "+3%" },
   ];
 
-  const chartData = chartRange === 'week' ? dynamicHealthData : monthHealthData;
+
 
   return (
     <div className="min-h-screen bg-muted/30 transition-colors duration-300">
@@ -108,45 +112,22 @@ export default function PatientDashboard() {
             <Card className="lg:col-span-2 border-border shadow-2xl shadow-primary/5 rounded-[2.5rem] bg-card overflow-hidden">
               <CardHeader className="p-10 pb-0 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl font-black text-foreground">Heart <span className="text-primary">Outlook</span></CardTitle>
-                  <p className="text-foreground/80 mt-1 font-medium">Your {chartRange}ly heart rate activity</p>
-                </div>
-                <div className="flex bg-muted p-1 rounded-xl">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`rounded-lg text-xs font-bold transition-all ${chartRange === 'week' ? "bg-card shadow-sm text-foreground" : "text-foreground/80"}`}
-                    onClick={() => setChartRange('week')}
-                  >
-                    Week
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`rounded-lg text-xs font-bold transition-all ${chartRange === 'month' ? "bg-card shadow-sm text-foreground" : "text-foreground/80"}`}
-                    onClick={() => setChartRange('month')}
-                  >
-                    Month
-                  </Button>
+                  <CardTitle className="text-2xl font-black text-foreground">Consultation <span className="text-primary">History</span></CardTitle>
+                  <p className="text-foreground/80 mt-1 font-medium">Your medical visits over the past 6 months</p>
                 </div>
               </CardHeader>
               <CardContent className="h-[350px] p-10 pt-6">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 13, fontWeight: 600}} dy={15} />
-                    <YAxis hide={true} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--foreground))', fontSize: 12, fontWeight: 700}} dy={10} />
+                    <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--foreground))', fontSize: 12, fontWeight: 700}} />
                     <Tooltip 
-                      contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', padding: '20px', backgroundColor: 'hsl(var(--card))', color: 'hsl(var(--card-foreground))' }}
+                      cursor={{fill: 'hsl(var(--primary) / 0.05)'}}
+                      contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', padding: '15px' }}
                     />
-                    <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
-                  </AreaChart>
+                    <Bar dataKey="visits" fill="#3b82f6" radius={[10, 10, 10, 10]} barSize={40} />
+                  </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>

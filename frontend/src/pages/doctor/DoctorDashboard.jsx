@@ -14,14 +14,14 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, AreaChart, Area } from 'recharts';
 
-const chartData = [
-  { name: 'Mon', revenue: 450, patients: 3 },
-  { name: 'Tue', revenue: 600, patients: 4 },
-  { name: 'Wed', revenue: 300, patients: 2 },
-  { name: 'Thu', revenue: 900, patients: 6 },
-  { name: 'Fri', revenue: 750, patients: 5 },
-  { name: 'Sat', revenue: 400, patients: 3 },
-  { name: 'Sun', revenue: 200, patients: 1 },
+const defaultChartData = [
+  { name: 'Mon', revenue: 0, patients: 0 },
+  { name: 'Tue', revenue: 0, patients: 0 },
+  { name: 'Wed', revenue: 0, patients: 0 },
+  { name: 'Thu', revenue: 0, patients: 0 },
+  { name: 'Fri', revenue: 0, patients: 0 },
+  { name: 'Sat', revenue: 0, patients: 0 },
+  { name: 'Sun', revenue: 0, patients: 0 },
 ];
 
 export default function DoctorDashboard() {
@@ -56,7 +56,37 @@ export default function DoctorDashboard() {
   const historyEarnings = totalCompleted * fee;
   const projectedEarnings = approvedCount * fee;
 
-  const currentRevData = revTab === 'history' ? chartData : chartData.map(d => ({ ...d, revenue: d.revenue * 1.5 }));
+  const getGroupedRevenueData = (isProjection = false) => {
+    if (!appointments || appointments.length === 0) return defaultChartData;
+    
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const data = days.map(name => ({ name, revenue: 0, patients: 0 }));
+
+    appointments.forEach(a => {
+      const apptDate = new Date(a.date);
+      const isPast = apptDate < new Date();
+      
+      let include = false;
+      if (isProjection) {
+        include = (a.status === 'approved' || a.status === 'pending') && !isPast;
+      } else {
+        include = (a.status === 'completed' || a.status === 'approved') && isPast;
+      }
+
+      if (include) {
+        const dayName = days[apptDate.getDay()];
+        const dayRecord = data.find(d => d.name === dayName);
+        if (dayRecord) {
+          dayRecord.patients += 1;
+          dayRecord.revenue += fee;
+        }
+      }
+    });
+
+    return [...data.slice(1), data[0]]; // Mon-Sun
+  };
+
+  const currentRevData = getGroupedRevenueData(revTab === 'projection');
 
   // Active Queue Logic
   const today = new Date().toISOString().split('T')[0];

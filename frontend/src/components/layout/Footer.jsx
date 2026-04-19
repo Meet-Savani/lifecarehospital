@@ -31,7 +31,7 @@ export default function Footer() {
               <span className="text-lg font-bold">LIOHNS Hospital</span>
             </div>
             <p className="text-sm text-foreground/70">
-              Providing quality healthcare services with compassion and excellence since 2010.
+              Advanced Super Specialty Care for ENT, Neurology, Neurosurgery, Oncosurgery, Opthalmology, Dental sciences, Dermatology, Plastic Surgery, Psychiatry, Pulmonary and More…
             </p>
           </motion.div>
           <motion.div custom={1} variants={footerColumnVariant}>
@@ -46,18 +46,18 @@ export default function Footer() {
           <motion.div custom={2} variants={footerColumnVariant}>
             <h4 className="font-semibold mb-3">Services</h4>
             <div className="space-y-2 text-sm text-foreground/70">
-              <p>General Medicine</p>
-              <p>Cardiology</p>
-              <p>Orthopedics</p>
-              <p>Pediatrics</p>
+              <a href="/#services" className="block hover:text-primary hover:translate-x-1 transition-all duration-200">Emergency Care</a>
+              <a href="/#services" className="block hover:text-primary hover:translate-x-1 transition-all duration-200">Ambulance Services</a>
+              <a href="/#services" className="block hover:text-primary hover:translate-x-1 transition-all duration-200">24/7 Pharmacy</a>
+              <a href="/#services" className="block hover:text-primary hover:translate-x-1 transition-all duration-200">Home Sample Pickup</a>
             </div>
           </motion.div>
           <motion.div custom={3} variants={footerColumnVariant}>
             <h4 className="font-semibold mb-3">Contact</h4>
             <div className="space-y-2 text-sm text-foreground/70">
-              <p className="flex items-center gap-2"><Phone className="h-4 w-4" /> +91 91043 23400</p>
-              <p className="flex items-center gap-2"><Mail className="h-4 w-4" /> liohnshospital748@gmail.com</p>
-              <p className="flex items-center gap-2"><MapPin className="h-8 w-8" /> Sarva Mangal Hall, Besides Swami Vivekananda Road Chowk, Memnagar, Ahmedabad, Gujarat 380052</p>
+              <a href="tel:07935096700" className="flex items-center gap-2 hover:text-primary transition-colors"><Phone className="h-4 w-4" /> 079-35096700</a>
+              <a href="mailto:liohnshospital748@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors"><Mail className="h-4 w-4" /> liohnshospital748@gmail.com</a>
+              <a href="https://maps.google.com/?q=Life+Care+Hospital+Memnagar+Ahmedabad" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors"><MapPin className="h-4 w-4 shrink-0" /> Beside Sarva Mangal Hall, Memnagar, Ahmedabad- 380052</a>
             </div>
           </motion.div>
         </motion.div>

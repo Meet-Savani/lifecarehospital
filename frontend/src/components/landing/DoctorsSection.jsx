@@ -8,10 +8,11 @@ import { motion } from "framer-motion";
 import { AnimatedSectionHeader, StaggerContainer, cardVariants, buttonHoverTap } from "./AnimatedSection";
 
 const fallbackDoctors = [
-  { _id: "1", userId: { fullName: "Dr. Sarah Johnson" }, specialization: "Cardiologist", experience: 15, profileImage: "https://images.unsplash.com/photo-1559839734-2b71cc197ec2?auto=format&fit=crop&q=80&w=300&h=400" },
-  { _id: "2", userId: { fullName: "Dr. Michael Chen" }, specialization: "Neurologist", experience: 12, profileImage: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=400" },
-  { _id: "3", userId: { fullName: "Dr. Emily Williams" }, specialization: "Orthopedic Surgeon", experience: 10, profileImage: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=300&h=400" },
-  { _id: "4", userId: { fullName: "Dr. James Anderson" }, specialization: "Pediatrician", experience: 8, profileImage: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=400" },
+    { _id: "1", userId: { fullName: "Dr. Navin Patel" }, specialization: "Consulting ENT Surgeon", experience: 15, profileImage: "" },
+    { _id: "2", userId: { fullName: "Dr. Rajan Merai" }, specialization: "ENT Surgeon. DLO(ENT)", experience: 12, profileImage: "" },
+    { _id: "3", userId: { fullName: "Dr. Heer Patel" }, specialization: "MS (ENT), FOIOSAS", experience: 10, profileImage: "" },
+    { _id: "4", userId: { fullName: "Dr. Kanak Mittal Patel" }, specialization: "ENT Consultant", experience: 8, profileImage: "" },
+    { _id: "5", userId: { fullName: "Dr. Abhijit Makwana" }, specialization: "Head & Neck Cancer Surgeon", experience: 10, profileImage: "" }
 ];
 
 export default function DoctorsSection() {

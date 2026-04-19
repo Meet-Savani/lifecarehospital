@@ -35,9 +35,7 @@ export default function AboutSection() {
               <span className="text-primary">Excellence & Innovation</span>
             </h2>
             <p className="text-foreground/70 text-lg mb-8 leading-relaxed">
-              LIOHNS Hospital is a premier healthcare institution committed to delivering world-class medical services. 
-              Our team of experienced professionals ensures personalized care with cutting-edge technology 
-              and a heart for service.
+              At Life Care Hospital, we believe that healthcare is not merely about treating ailments, but about nurturing lives with compassion, precision, and innovation. Established with a commitment to deliver world-class healthcare solutions, we stand as one of Ahmedabad’s leading multi-specialty hospitals, trusted by patients and families alike.
             </p>
             
             <ul className="space-y-4 mb-8">

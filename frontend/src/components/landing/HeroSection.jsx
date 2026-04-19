@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useNavigate } from "react-router-dom";
 import { Phone, CalendarPlus, ShieldCheck, Star, Users, LayoutDashboard, CalendarCheck } from "lucide-react";
 import { motion } from "framer-motion";
-import heroImg from "@/assets/hero-hospital.jpg";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -15,13 +14,11 @@ export default function HeroSection({ id }) {
   return (
     <section id={id} className="relative min-h-[700px] flex items-center overflow-hidden">
       <div className="absolute inset-0">
-        <motion.img 
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
-          src={heroImg} 
+        <img 
+          src="https://liohns.com/wp-content/uploads/2025/08/Rectangle-40375-8.png" 
           alt="LIOHNS Hospital" 
-          className="w-full h-full object-cover" 
+          className="w-full h-full object-cover object-[95%_center]"
+          loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-blue-900/70 to-transparent z-0" />
       </div>
@@ -37,15 +34,15 @@ export default function HeroSection({ id }) {
               {role === 'doctor' ? `Welcome Back, Dr. ${user?.fullName?.split(' ')[1] || 'Specialist'}` : 'Trusted by 50,000+ Patients'}
             </span>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-white leading-tight mb-6 tracking-tight">
-              {role === 'doctor' ? 'Revolutionize Your' : 'Modern Care'} <br />
+              {role === 'doctor' ? 'Revolutionize Your' : 'Welcome To'} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-emerald-300">
-                {role === 'doctor' ? 'Clinical Practice' : 'With Compassion'}
+                {role === 'doctor' ? 'Clinical Practice' : 'LIOHN Hospital'}
               </span>
             </h1>
             <p className="text-xl text-blue-100/90 mb-10 max-w-lg leading-relaxed">
               {role === 'doctor' 
                 ? 'Access your clinical dashboard, manage patient schedules, and streamline your medical consultations with our integrated healthcare platform.'
-                : 'Experience the next generation of healthcare. Book appointments, consult top specialists, and get AI-driven health insights instantly.'}
+                : 'We are open 24/7 at your service. Advanced Super Specialty Care for ENT, Neurology, Neurosurgery, Oncosurgery, Opthalmology, Dental sciences, Dermatology, Plastic Surgery, Psychiatry, Pulmonary and More…'}
             </p>
             
             <div className="flex flex-wrap gap-4 mb-12">
@@ -86,13 +83,13 @@ export default function HeroSection({ id }) {
                       "linear-gradient(135deg, #b91c1c, #dc2626)",
                     ],
                     boxShadow: [
-                      "0 0 30px 8px rgba(220,38,38,0.7), 0 0 60px 15px rgba(220,38,38,0.3)",
-                      "0 0 30px 8px rgba(37,99,235,0.7), 0 0 60px 15px rgba(37,99,235,0.3)",
-                      "0 0 30px 8px rgba(220,38,38,0.7), 0 0 60px 15px rgba(220,38,38,0.3)",
+                      "0 0 20px 4px rgba(220,38,38,0.5)",
+                      "0 0 20px 4px rgba(37,99,235,0.5)",
+                      "0 0 20px 4px rgba(220,38,38,0.5)",
                     ],
                   }}
                   whileTap={{ scale: 0.93 }}
-                  transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   className="rounded-full p-0.5"
                 >
                   <Button
@@ -102,9 +99,9 @@ export default function HeroSection({ id }) {
                   >
                     {/* Shimmer sweep */}
                     <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                       animate={{ x: ["-100%", "200%"] }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear", repeatDelay: 0.3 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
                     />
                     <Phone className="mr-2 h-5 w-5 animate-bounce relative z-10" />
                     <span className="relative z-10">🚨 Emergency</span>
@@ -141,9 +138,7 @@ export default function HeroSection({ id }) {
       
       {/* Decorative Elements */}
       <div className="absolute bottom-0 right-0 p-10 hidden lg:block overflow-hidden pointer-events-none">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        <div 
           className="w-96 h-96 rounded-full border-[32px] border-white/5 -mb-48 -mr-48" 
         />
       </div>
