@@ -13,15 +13,15 @@ services:
       - key: PORT
         value: 10000
       - key: MONGODB_URI
-        sync: false # Set this in Render Dashboard
+        sync: mongodb+srv://test:VLefFSpRt7Ih8M1W@cluster0.isbq290.mongodb.net/LIOHNS?appName=Cluster0 # Set this in Render Dashboard
       - key: JWT_SECRET
         generateValue: true
       - key: CLOUDINARY_CLOUD_NAME
-        sync: false
+        sync: dt1vudtwp
       - key: CLOUDINARY_API_KEY
-        sync: false
+        sync: 911269952868956
       - key: CLOUDINARY_API_SECRET
-        sync: false
+        sync: kmC8PIQTqvyGkiCRhMBwwQNGW2k
 
   # Frontend Static Site
   - type: static
