@@ -57,7 +57,7 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 flex items-center justify-between h-20">
         <a href="/" onClick={(e) => handleNavClick(e, "hero")} title="Home" className="flex items-center gap-2 group cursor-pointer">
-          <img src={Logo} alt="LIOHNS Logo" className="h-10 w-auto shadow-sm dark:invert group-hover:scale-105 transition-transform duration-300" />
+          <img src={Logo} alt="LIOHNS Logo" className="h-7 md:h-9 lg:h-11 max-h-11 w-auto shadow-sm dark:invert group-hover:scale-105 transition-transform duration-300" />
         </a>
 
         <div className="hidden md:flex items-center gap-8">

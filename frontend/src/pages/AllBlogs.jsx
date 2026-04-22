@@ -68,13 +68,15 @@ export default function AllBlogs() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="group flex flex-col h-full bg-card rounded-[3rem] border border-border hover:border-primary/20 hover:bg-card hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 overflow-hidden"
+                  className="group flex flex-col h-full bg-card border border-border hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-[border-color,box-shadow,background-color] duration-500"
+                  style={{ borderRadius: '3rem', clipPath: 'inset(0 round 3rem)', transform: 'translateZ(0)' }}
                 >
                   <Link to={`/blog/${b._id}`} className="block relative h-72 overflow-hidden">
                     <img 
                       src={b.image || "https://images.unsplash.com/photo-1576091160550-217359f42f8c?w=800"} 
                       alt={b.title} 
-                      className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" 
+                      className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                      style={{ transform: 'translateZ(0)' }}
                     />
                     <div className="absolute top-6 left-6">
                       <span className="px-4 py-2 bg-primary/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-primary shadow-sm border border-primary/10">

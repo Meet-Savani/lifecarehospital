@@ -125,15 +125,30 @@ export default function ConsultationChats() {
     },
   });
 
-  // Handle auto-selection of chat basen on appointmentId
+  const [chatCreating, setChatCreating] = useState(false);
   useEffect(() => {
-    if (appointmentId && chats?.length > 0) {
-      const chat = chats.find(c => 
-        (typeof c.appointmentId === 'object' ? c.appointmentId?._id === appointmentId : c.appointmentId === appointmentId)
-      );
-      if (chat) setSelectedChat(chat);
+    if (!appointmentId || !chats) return;
+
+    const existingChat = chats.find(c => 
+      (typeof c.appointmentId === 'object' ? c.appointmentId?._id === appointmentId : c.appointmentId === appointmentId)
+    );
+
+    if (existingChat) {
+      setSelectedChat(existingChat);
+    } else if (!chatCreating) {
+      setChatCreating(true);
+      api.get(`/chat/${appointmentId}`)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ["my-consultation-chats"] });
+        })
+        .catch((err) => {
+          console.error("Failed to create chat:", err);
+          const msg = err.response?.data?.message || "Could not start chat. Ensure the appointment is approved.";
+          toast({ title: "Chat Error", description: msg, variant: "destructive" });
+        })
+        .finally(() => setChatCreating(false));
     }
-  }, [appointmentId, chats]);
+  }, [appointmentId, chats, chatCreating, queryClient, toast]);
 
   const { data: initialMessages } = useQuery({
     queryKey: ["chat-messages", selectedChat?._id],
@@ -144,7 +159,6 @@ export default function ConsultationChats() {
     enabled: !!selectedChat?._id,
   });
 
-  // Mark chat as read when opened
   useEffect(() => {
     if (!selectedChat?._id) return;
     const markRead = async () => {
@@ -167,10 +181,8 @@ export default function ConsultationChats() {
           if (prev.find(m => m._id === newMsg._id)) return prev;
           return [...prev, newMsg];
         });
-        // Mark read instantly if active
         api.put(`/chat/messages/${selectedChat._id}/read`);
       } else {
-        // Different chat got message, invalidate to update badge count
         queryClient.invalidateQueries(["my-consultation-chats"]);
       }
     };
@@ -191,7 +203,6 @@ export default function ConsultationChats() {
         message: msgInput, 
         type: "text" 
       });
-      // Append immediately to eliminate echo
       setMessages(prev => {
         if (prev.find(m => m._id === res.data._id)) return prev;
         return [...prev, res.data];
