@@ -16,11 +16,11 @@ services:
         sync: mongodb+srv://test:VLefFSpRt7Ih8M1W@cluster0.isbq290.mongodb.net/LIOHNS?appName=Cluster0 # Set this in Render Dashboard
       - key: JWT_SECRET
         generateValue: true
-      - key: CLOUDINARY_CLOUD_NAME
+      - key: CL_CLOUD_NAME
         sync: dt1vudtwp
-      - key: CLOUDINARY_API_KEY
+      - key: CL_API_KEY
         sync: 911269952868956
-      - key: CLOUDINARY_API_SECRET
+      - key: CL_API_SECRET
         sync: kmC8PIQTqvyGkiCRhMBwwQNGW2k
 
   # Frontend Static Site
@@ -33,10 +33,7 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: care-companion-backend
-          property: url
+        value: https://life-care-backend-xzfk.onrender.com/api
     routes:
       - type: rewrite
         source: /*
