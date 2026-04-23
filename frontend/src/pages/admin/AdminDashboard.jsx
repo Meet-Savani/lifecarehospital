@@ -96,7 +96,10 @@ export default function AdminDashboard() {
                   </div>
                   <div className="mt-6">
                     <p className="text-[11px] font-black uppercase text-foreground/80 tracking-widest truncate">{m.label}</p>
-                    <h3 className="text-2xl lg:text-3xl font-black text-foreground mt-1 break-words leading-tight">{m.value}</h3>
+                    <h3 className={cn(
+                      "font-black text-foreground mt-1 break-words leading-tight",
+                      m.label === "Total Revenue" ? "text-xl lg:text-2xl" : "text-2xl lg:text-3xl"
+                    )}>{m.value}</h3>
                   </div>
                 </CardContent>
               </Card>

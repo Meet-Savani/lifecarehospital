@@ -182,11 +182,17 @@ export default function DoctorAppointments() {
                       )}
                     </td>
                     <td className="p-4">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                        a.isPaid ? "bg-emerald-500/10 text-emerald-600" : "bg-warning/10 text-warning"
-                      }`}>
-                        {a.isPaid ? 'Paid' : 'Not Paid'}
-                      </span>
+                      {a.status === 'rejected' ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-red-500/10 text-red-600 border border-red-200/50">
+                          Locked
+                        </span>
+                      ) : (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          a.isPaid ? "bg-emerald-500/10 text-emerald-600" : "bg-warning/10 text-warning"
+                        }`}>
+                          {a.isPaid ? 'Paid' : 'Not Paid'}
+                        </span>
+                      )}
                     </td>
                     <td className="p-4">
                       {a.status === 'approved' || a.status === 'completed' ? (

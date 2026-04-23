@@ -218,7 +218,9 @@ export default function PatientAppointments() {
                               Paid
                             </span>
                           ) : a.status === 'rejected' ? (
-                            <span className="text-xs text-muted-foreground">Locked</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-red-500/10 text-red-600 border border-red-200/50">
+                              Locked
+                            </span>
                           ) : (
                             <Link to={`/patient/payment/${a._id}`} className="flex-shrink-0">
                               <span className="text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-warning/10 text-warning hover:bg-warning/20 transition-colors cursor-pointer border border-warning/20 whitespace-nowrap inline-block">

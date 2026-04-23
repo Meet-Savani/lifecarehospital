@@ -141,9 +141,15 @@ export default function AdminAnalytics() {
                     paddingAngle={8}
                     dataKey="value"
                   >
-                    {stats?.statusDistribution?.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={8} stroke="transparent" />
-                    ))}
+                    {stats?.statusDistribution?.map((entry, index) => {
+                      const status = entry.name.toLowerCase();
+                      let color = '#3b82f6'; // Default blue
+                      if (status === 'completed') color = '#10b981'; // Green
+                      else if (status === 'pending') color = '#f59e0b'; // Orange
+                      else if (status === 'rejected' || status === 'cancelled') color = '#ef4444'; // Red
+                      
+                      return <Cell key={`cell-${index}`} fill={color} cornerRadius={8} stroke="transparent" />;
+                    })}
                   </Pie>
                   <Tooltip 
                     contentStyle={{ 

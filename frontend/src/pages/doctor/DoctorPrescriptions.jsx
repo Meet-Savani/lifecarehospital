@@ -27,11 +27,28 @@ export default function DoctorPrescriptions() {
   const queryClient = useQueryClient();
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [existingPrescId, setExistingPrescId] = useState(null);
+  const [medicines, setMedicines] = useState([{ 
+    name: "", 
+    quantity: "", 
+    dosage: { morning: false, noon: false, evening: false }, 
+    mealTiming: "After Meal", 
+    description: "",
+    isAdded: false
+  }]);
+  const [generalNotes, setGeneralNotes] = useState("");
 
   const { data: prescriptions } = useQuery({
     queryKey: ["all-prescriptions"],
     queryFn: async () => {
       const response = await api.get("/prescriptions");
+      return response.data || [];
+    },
+  });
+
+  const { data: appointments } = useQuery({
+    queryKey: ["doctor-appointed-patients"],
+    queryFn: async () => {
+      const response = await api.get("/appointments/appointments"); // Reusing same endpoint as doctor appointments
       return response.data || [];
     },
   });
