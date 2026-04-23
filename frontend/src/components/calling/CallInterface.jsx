@@ -7,6 +7,8 @@ import { Button } from '../ui/button';
 const CallInterface = () => {
   const { 
     call, 
+    stream,
+    pcRemoteStream,
     myVideo, 
     userVideo, 
     callDuration, 
@@ -25,10 +27,10 @@ const CallInterface = () => {
 
   // Robust sync of streams to video elements
   useEffect(() => {
-    if (isConnected && userVideo.current && remoteStream) {
-        userVideo.current.srcObject = remoteStream;
+    if (isConnected && userVideo.current && pcRemoteStream) {
+        userVideo.current.srcObject = pcRemoteStream;
     }
-  }, [isConnected, remoteStream]);
+  }, [isConnected, pcRemoteStream]);
 
   useEffect(() => {
     if (myVideo.current && stream) {

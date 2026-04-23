@@ -23,7 +23,7 @@ export const CallProvider = ({ children }) => {
   });
   
   const [stream, setStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
+  const [pcRemoteStream, setPcRemoteStream] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
@@ -68,7 +68,7 @@ export const CallProvider = ({ children }) => {
     stopSounds();
     setCall({ isReceivingCall: false, from: null, name: null, signal: null, callType: 'video', status: 'idle' });
     setStream(null);
-    setRemoteStream(null);
+    setPcRemoteStream(null);
     setCallDuration(0);
     setOtherUser(null);
     setIsMuted(false);
@@ -166,9 +166,6 @@ export const CallProvider = ({ children }) => {
   }, [call.status]);
 
   const setupWebRTC = async (isCaller) => {
-    // Buffering ICE candidates if remote description isn't set yet
-    const iceCandidatesBuffer = useRef([]);
-    
     // Configuration with standard STUN and placeholders for TURN
     const peerConnection = new RTCPeerConnection({
         iceServers: [
@@ -209,7 +206,7 @@ export const CallProvider = ({ children }) => {
 
     peerConnection.ontrack = (event) => {
         console.log("Remote track received:", event.streams[0]);
-        setRemoteStream(event.streams[0]);
+        setPcRemoteStream(event.streams[0]);
     };
 
     try {
@@ -343,7 +340,7 @@ export const CallProvider = ({ children }) => {
     <CallContext.Provider value={{
       call,
       stream,
-      remoteStream,
+      pcRemoteStream,
       myVideo,
       userVideo,
       callDuration,
