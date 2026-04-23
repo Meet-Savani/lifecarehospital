@@ -1,9 +1,17 @@
 import axios from 'axios';
 
-let API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-if (API_URL && API_URL.startsWith("VITE_API_URL=")) {
-  API_URL = API_URL.replace("VITE_API_URL=", "");
+let API_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").trim();
+if (API_URL.includes("VITE_API_URL=")) {
+  API_URL = API_URL.split("VITE_API_URL=").pop().trim();
 }
+
+let rawApiUrl = (import.meta.env.VITE_API_URL || "").trim();
+if (rawApiUrl.includes("VITE_API_URL=")) {
+  rawApiUrl = rawApiUrl.split("VITE_API_URL=").pop().trim();
+}
+const SOCKET_URL = rawApiUrl ? rawApiUrl.replace('/api', '') : 'http://localhost:5000';
+console.log("Resolved Socket URL:", SOCKET_URL);
+console.log("Resolved API URL:", API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
