@@ -44,14 +44,18 @@ const MessageBubble = ({ m, isMe, onSelectMedia, onDownload }) => {
         {m.type === "text" && <div className="p-4"><p className="text-sm font-medium leading-relaxed">{m.message}</p></div>}
         
         {m.type === "call" && (
-            <div className="p-4 flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isMe ? "bg-white/20" : "bg-slate-100"}`}>
-                    {m.message.includes("Video") ? <VideoIcon className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+            <div className={`p-4 flex items-center gap-4 ${isMe ? "bg-white/10" : "bg-slate-50"}`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${
+                    isMe ? "bg-white/20 text-white" : "bg-white text-primary border border-slate-100"
+                }`}>
+                    {m.message.includes("Video") ? <VideoIcon className="w-6 h-6" /> : <Phone className="w-6 h-6" />}
                 </div>
-                <div>
-                    <p className="text-sm font-bold">{m.message}</p>
-                    <p className={`text-[10px] ${isMe ? "text-white/60" : "text-slate-400"}`}>
-                        {format(new Date(m.createdAt), 'hh:mm a')}
+                <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-black tracking-tight ${isMe ? "text-white" : "text-slate-800"}`}>
+                        {m.message}
+                    </p>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isMe ? "text-white/60" : "text-slate-400"}`}>
+                        {m.message.includes("Missed") || m.message.includes("Rejected") || m.message.includes("Cancelled") ? "Incomplete" : "Voice/Video Session"}
                     </p>
                 </div>
             </div>

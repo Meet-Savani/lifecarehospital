@@ -1,9 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useSocket } from './SocketContext';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 
 const CallContext = createContext(undefined);
+
+// Sound URLs
+const INCOMING_RING_URL = "https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3"; 
+const OUTGOING_RING_URL = "https://www.soundjay.com/phone/phone-calling-1.mp3";
 
 export const CallProvider = ({ children }) => {
   const { socket, on, off, emit } = useSocket();
@@ -15,7 +19,7 @@ export const CallProvider = ({ children }) => {
     name: null,
     signal: null,
     callType: 'video',
-    status: 'idle' // idle, ringing, calling, connected, ended
+    status: 'idle' // idle, ringing, calling, connected, ended, rejected, cancelled
   });
   
   const [stream, setStream] = useState(null);
@@ -23,40 +27,101 @@ export const CallProvider = ({ children }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
-  const [otherUser, setOtherUser] = useState(null); // The person we are talking to
+  const [otherUser, setOtherUser] = useState(null);
   
   const myVideo = useRef();
   const userVideo = useRef();
   const connectionRef = useRef();
   const timerRef = useRef();
   const localStreamRef = useRef();
+  const timeoutRef = useRef();
+  
+  const incomingRing = useRef(new Audio(INCOMING_RING_URL));
+  const outgoingRing = useRef(new Audio(OUTGOING_RING_URL));
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+  // Configure audio loops
+  useEffect(() => {
+    incomingRing.current.loop = true;
+    outgoingRing.current.loop = true;
+  }, []);
+
+  const playSound = (type) => {
+    try {
+        if (type === 'incoming') {
+            incomingRing.current.play().catch(e => console.log("Sound play error:", e));
+        } else if (type === 'outgoing') {
+            outgoingRing.current.play().catch(e => console.log("Sound play error:", e));
+        }
+    } catch (e) {}
+  };
+
+  const stopSounds = useCallback(() => {
+    incomingRing.current.pause();
+    incomingRing.current.currentTime = 0;
+    outgoingRing.current.pause();
+    outgoingRing.current.currentTime = 0;
+  }, []);
+
+  const resetCallState = useCallback(() => {
+    stopSounds();
+    setCall({ isReceivingCall: false, from: null, name: null, signal: null, callType: 'video', status: 'idle' });
+    setStream(null);
+    setRemoteStream(null);
+    setCallDuration(0);
+    setOtherUser(null);
+    setIsMuted(false);
+    setIsVideoOff(false);
+    
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null;
+    }
+    if (connectionRef.current) {
+        connectionRef.current.close();
+        connectionRef.current = null;
+    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, [stopSounds]);
 
   useEffect(() => {
     if (!socket) return;
 
     on('incoming_call', ({ from, name, signal, callType }) => {
       setCall({ isReceivingCall: true, from, name, signal, callType, status: 'ringing' });
+      playSound('incoming');
     });
 
-    on('call_accepted', ({ signal, answererId }) => {
+    on('call_accepted', async ({ signal, answererId }) => {
+      stopSounds();
       setCall(prev => ({ ...prev, status: 'connected' }));
       if (connectionRef.current) {
-        connectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+        try {
+            await connectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+        } catch (e) {
+            console.error("Error setting remote description:", e);
+        }
       }
     });
 
     on('call_rejected', () => {
-      endCallLocally('rejected');
+      stopSounds();
+      setCall(prev => ({ ...prev, status: 'rejected' }));
+      setTimeout(resetCallState, 2000);
     });
 
     on('call_cancelled', () => {
-      endCallLocally('cancelled');
+      stopSounds();
+      setCall(prev => ({ ...prev, status: 'cancelled' }));
+      setTimeout(resetCallState, 2000);
     });
 
     on('call_ended', () => {
-      endCallLocally('completed');
+      stopSounds();
+      setCall(prev => ({ ...prev, status: 'ended' }));
+      setTimeout(resetCallState, 2000);
     });
 
     on('ice_candidate', ({ candidate }) => {
@@ -66,7 +131,6 @@ export const CallProvider = ({ children }) => {
     });
 
     on('call_accepted_elsewhere', () => {
-      // If call was accepted on another device, reset this one
       resetCallState();
     });
 
@@ -79,7 +143,7 @@ export const CallProvider = ({ children }) => {
       off('ice_candidate');
       off('call_accepted_elsewhere');
     };
-  }, [socket, on, off]);
+  }, [socket, on, off, resetCallState, stopSounds]);
 
   useEffect(() => {
     if (call.status === 'connected') {
@@ -92,18 +156,6 @@ export const CallProvider = ({ children }) => {
     return () => clearInterval(timerRef.current);
   }, [call.status]);
 
-  const resetCallState = () => {
-    setCall({ isReceivingCall: false, from: null, name: null, signal: null, callType: 'video', status: 'idle' });
-    setStream(null);
-    setRemoteStream(null);
-    setCallDuration(0);
-    setOtherUser(null);
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => track.stop());
-      localStreamRef.current = null;
-    }
-  };
-
   const setupWebRTC = async (isCaller) => {
     const peerConnection = new RTCPeerConnection({
         iceServers: [
@@ -114,7 +166,10 @@ export const CallProvider = ({ children }) => {
 
     peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-            emit('ice_candidate', { to: isCaller ? otherUser?.id : call.from, candidate: event.candidate });
+            emit('ice_candidate', { 
+                to: isCaller ? otherUser?.id : call.from, 
+                candidate: event.candidate 
+            });
         }
     };
 
@@ -125,20 +180,25 @@ export const CallProvider = ({ children }) => {
         }
     };
 
-    const localStream = await navigator.mediaDevices.getUserMedia({
-        video: call.callType === 'video',
-        audio: true
-    });
-    
-    setStream(localStream);
-    localStreamRef.current = localStream;
-    if (myVideo.current) {
-        myVideo.current.srcObject = localStream;
-    }
+    try {
+        const localStream = await navigator.mediaDevices.getUserMedia({
+            video: call.callType === 'video' || isVideoOff === false,
+            audio: true
+        });
+        
+        setStream(localStream);
+        localStreamRef.current = localStream;
+        if (myVideo.current) {
+            myVideo.current.srcObject = localStream;
+        }
 
-    localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
-    });
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+        });
+    } catch (err) {
+        console.error("Failed to get local stream", err);
+        alert("Could not access camera/microphone. Please check permissions.");
+    }
 
     connectionRef.current = peerConnection;
     return peerConnection;
@@ -146,7 +206,8 @@ export const CallProvider = ({ children }) => {
 
   const callUser = async (id, name, type, chatId) => {
     setOtherUser({ id, name, chatId });
-    setCall(prev => ({ ...prev, callType: type, status: 'calling' }));
+    setCall(prev => ({ ...prev, callType: type, status: 'calling', name }));
+    playSound('outgoing');
 
     const peerConnection = await setupWebRTC(true);
     const offer = await peerConnection.createOffer();
@@ -160,17 +221,16 @@ export const CallProvider = ({ children }) => {
         callType: type
     });
 
-    // Missed call timeout (30 seconds)
-    timerRef.current = setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
         if (connectionRef.current && connectionRef.current.connectionState !== 'connected') {
-            emit('cancel_call', { to: id });
+            cancelCall();
             saveCallHistory('missed');
-            resetCallState();
         }
-    }, 30000);
+    }, 45000);
   };
 
   const answerCall = async () => {
+    stopSounds();
     const peerConnection = await setupWebRTC(false);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(call.signal));
     
@@ -183,40 +243,38 @@ export const CallProvider = ({ children }) => {
         signal: answer, 
         to: call.from, 
         answererId: user._id,
-        receiverId: user._id // for multi-device sync
+        receiverId: user._id
     });
   };
 
   const rejectCall = () => {
+    stopSounds();
     emit('reject_call', { to: call.from });
     saveCallHistory('rejected');
-    resetCallState();
+    setCall(prev => ({ ...prev, status: 'rejected' }));
+    setTimeout(resetCallState, 1000);
   };
 
   const cancelCall = () => {
-    emit('cancel_call', { to: otherUser?.id });
+    stopSounds();
+    emit('cancel_call', { to: otherUser?.id || call.from });
     saveCallHistory('cancelled');
-    resetCallState();
+    setCall(prev => ({ ...prev, status: 'cancelled' }));
+    setTimeout(resetCallState, 1000);
   };
 
   const endCall = () => {
+    stopSounds();
     const targetId = otherUser?.id || call.from;
     emit('end_call', { to: targetId });
     saveCallHistory('completed');
-    resetCallState();
-  };
-
-  const endCallLocally = (status) => {
-    // If not initiated by us, we might still want to save history if we were the receiver
-    // But usually one side saves it. Let's make the caller save it or both? 
-    // To avoid duplicates, let's make the one who clicks 'End' or the 'Caller' save it.
-    // Actually, saving on backend is better but we'll do it from frontend for simplicity here.
-    resetCallState();
+    setCall(prev => ({ ...prev, status: 'ended' }));
+    setTimeout(resetCallState, 1000);
   };
 
   const saveCallHistory = async (status) => {
     const targetId = otherUser?.id || call.from;
-    const chatId = otherUser?.chatId || null; // We'd need chatId to show in chat
+    const chatId = otherUser?.chatId || null;
     
     try {
         await axios.post(`${API_URL}/calls`, {
