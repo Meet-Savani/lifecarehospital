@@ -7,7 +7,7 @@ export default function VideoCall({ otherUserId, otherUserName, isIncoming, inco
   const [callActive, setCallActive] = useState(false);
   const [isCalling, setIsCalling] = useState(!isIncoming);
   const [stream, setStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
+  const [pcRemoteStream, setPcRemoteStream] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   
@@ -63,7 +63,7 @@ export default function VideoCall({ otherUserId, otherUserName, isIncoming, inco
       <div className="relative w-full max-w-4xl aspect-video bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
         {/* Remote Video */}
         <div className="absolute inset-0 flex items-center justify-center">
-          {remoteStream ? (
+          {pcRemoteStream ? (
             <video playsInline ref={userVideo} autoPlay className="w-full h-full object-cover" />
           ) : (
             <div className="flex flex-col items-center gap-4 text-white">
