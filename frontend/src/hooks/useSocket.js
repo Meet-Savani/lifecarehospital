@@ -3,7 +3,11 @@ import { io } from 'socket.io-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+let rawApiUrl = import.meta.env.VITE_API_URL;
+if (rawApiUrl && rawApiUrl.startsWith('VITE_API_URL=')) {
+  rawApiUrl = rawApiUrl.replace('VITE_API_URL=', '');
+}
+const SOCKET_URL = rawApiUrl ? rawApiUrl.replace('/api', '') : 'http://localhost:5000';
 
 export const useSocket = () => {
   const { user } = useAuth();

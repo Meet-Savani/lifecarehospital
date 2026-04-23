@@ -5,7 +5,11 @@ import { useQueryClient } from '@tanstack/react-query';
 
 const SocketContext = createContext(undefined);
 
-const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+let rawApiUrl = import.meta.env.VITE_API_URL;
+if (rawApiUrl && rawApiUrl.startsWith('VITE_API_URL=')) {
+  rawApiUrl = rawApiUrl.replace('VITE_API_URL=', '');
+}
+const SOCKET_URL = rawApiUrl ? rawApiUrl.replace('/api', '') : 'http://localhost:5000';
 
 export function SocketProvider({ children }) {
   const { user } = useAuth();
