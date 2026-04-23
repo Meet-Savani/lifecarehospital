@@ -142,14 +142,15 @@ export default function AdminDashboard() {
                                </div>
                             </div>
                          </div>
-                         <Badge 
-                           className={`h-10 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] border-none shadow-sm ${
-                             a.status === "completed" ? "bg-green-500 text-white" :
-                             a.status === "pending" ? "bg-orange-500 text-white" :
-                             a.status === "rejected" ? "bg-red-500 text-white" :
-                             "bg-primary text-white"
-                           }`}
-                         >
+                          <Badge 
+                            className={cn(
+                              "h-10 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] border-none shadow-sm transition-none cursor-default",
+                              a.status === "completed" ? "bg-green-500 text-white hover:bg-green-500" :
+                              a.status === "pending" ? "bg-orange-500 text-white hover:bg-orange-500" :
+                              a.status === "rejected" ? "bg-red-500 text-white hover:bg-red-500" :
+                              "bg-blue-500 text-white hover:bg-blue-500"
+                            )}
+                          >
                            {a.status}
                          </Badge>
                       </div>

@@ -147,6 +147,7 @@ export default function AdminAnalytics() {
                       if (status === 'completed') color = '#10b981'; // Green
                       else if (status === 'pending') color = '#f59e0b'; // Orange
                       else if (status === 'rejected' || status === 'cancelled') color = '#ef4444'; // Red
+                      else if (status === 'approved') color = '#3b82f6'; // Blue
                       
                       return <Cell key={`cell-${index}`} fill={color} cornerRadius={8} stroke="transparent" />;
                     })}
