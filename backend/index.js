@@ -30,6 +30,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads', { maxAge: '7d' }));
 app.use(express.static('public'));
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);
@@ -45,8 +51,18 @@ app.use('/api/calls', callRoutes);
 // Initialize Socket
 initSocket(server);
 
+// Static files for frontend
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+// Initial route
 app.get('/', (req, res) => {
   res.send('Care Companion API is running...');
+});
+
+// SPA catch-all route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 const PORT = process.env.PORT;
