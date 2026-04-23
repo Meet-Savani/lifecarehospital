@@ -23,6 +23,19 @@ const CallInterface = () => {
   const isRinging = call.status === 'ringing';
   const isEnded = ['ended', 'rejected', 'cancelled'].includes(call.status);
 
+  // Robust sync of streams to video elements
+  useEffect(() => {
+    if (isConnected && userVideo.current && remoteStream) {
+        userVideo.current.srcObject = remoteStream;
+    }
+  }, [isConnected, remoteStream]);
+
+  useEffect(() => {
+    if (myVideo.current && stream) {
+        myVideo.current.srcObject = stream;
+    }
+  }, [stream]);
+
   if (call.status === 'idle' || (call.isReceivingCall && !isConnected && !isEnded)) return null;
 
   const formatTime = (seconds) => {

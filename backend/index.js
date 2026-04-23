@@ -55,11 +55,6 @@ initSocket(server);
 const frontendPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendPath));
 
-// Initial route
-app.get('/', (req, res) => {
-  res.send('Care Companion API is running...');
-});
-
 // SPA catch-all route
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));

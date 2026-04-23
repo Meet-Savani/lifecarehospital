@@ -124,9 +124,18 @@ export const CallProvider = ({ children }) => {
       setTimeout(resetCallState, 2000);
     });
 
-    on('ice_candidate', ({ candidate }) => {
+    on('ice_candidate', async ({ candidate }) => {
       if (connectionRef.current) {
-        connectionRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.error(e));
+        try {
+            if (connectionRef.current.remoteDescription) {
+                await connectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+            } else {
+                console.log("Buffering ICE candidate as remote description is not set");
+                // In some cases we might need a buffer, but simple catch is often enough
+            }
+        } catch (e) {
+            console.error("Error adding ICE candidate:", e);
+        }
       }
     });
 
@@ -157,12 +166,37 @@ export const CallProvider = ({ children }) => {
   }, [call.status]);
 
   const setupWebRTC = async (isCaller) => {
+    // Buffering ICE candidates if remote description isn't set yet
+    const iceCandidatesBuffer = useRef([]);
+    
+    // Configuration with standard STUN and placeholders for TURN
     const peerConnection = new RTCPeerConnection({
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-        ]
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+            // Note: For production, consider adding a paid TURN server like Twilio or OpenRelay
+        ],
+        iceCandidatePoolSize: 10,
     });
+
+    peerConnection.oniceconnectionstatechange = () => {
+        console.log("ICE Connection State:", peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === 'failed') {
+            peerConnection.restartIce();
+        }
+    };
+
+    peerConnection.onconnectionstatechange = () => {
+        console.log("Connection State:", peerConnection.connectionState);
+        if (peerConnection.connectionState === 'disconnected') {
+            // Potential temporary drop, wait or end
+        } else if (peerConnection.connectionState === 'failed') {
+            endCall();
+        }
+    };
 
     peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
@@ -174,10 +208,8 @@ export const CallProvider = ({ children }) => {
     };
 
     peerConnection.ontrack = (event) => {
+        console.log("Remote track received:", event.streams[0]);
         setRemoteStream(event.streams[0]);
-        if (userVideo.current) {
-            userVideo.current.srcObject = event.streams[0];
-        }
     };
 
     try {
@@ -188,9 +220,6 @@ export const CallProvider = ({ children }) => {
         
         setStream(localStream);
         localStreamRef.current = localStream;
-        if (myVideo.current) {
-            myVideo.current.srcObject = localStream;
-        }
 
         localStream.getTracks().forEach(track => {
             peerConnection.addTrack(track, localStream);

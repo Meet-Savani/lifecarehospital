@@ -45,14 +45,14 @@ export const initSocket = (server) => {
     
     // Caller initiates a call
     socket.on('call_user', ({ userToCall, signalData, from, name, callType }) => {
-      console.log(`Call from ${from} to ${userToCall} (${callType})`);
+      console.log(`[CALL] From ${from} to ${userToCall} (${callType})`);
       // Emit to all devices of the receiver
       io.to(userToCall).emit('incoming_call', { signal: signalData, from, name, callType });
     });
 
     // Receiver accepts the call
     socket.on('answer_call', (data) => {
-      console.log(`Call accepted by ${data.to}`);
+      console.log(`[CALL] Accepted by ${data.answererId} for caller ${data.to}`);
       // Emit to all devices of the caller (signaling)
       io.to(data.to).emit('call_accepted', { signal: data.signal, answererId: data.answererId });
       
@@ -76,6 +76,7 @@ export const initSocket = (server) => {
     });
 
     socket.on('ice_candidate', ({ to, candidate }) => {
+      // console.log(`[ICE] Candidate for ${to}`);
       io.to(to).emit('ice_candidate', { candidate, from: socket.id });
     });
 
