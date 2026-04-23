@@ -25,7 +25,7 @@ const alternateSlide = {
 
 export default function FacilitiesSection() {
   return (
-    <section className="py-24 bg-card text-foreground transition-colors duration-300 overflow-hidden relative border-y border-border">
+    <section className="py-16 md:py-24 bg-card text-foreground transition-colors duration-300 overflow-hidden relative border-y border-border">
       {/* Decorative background element */}
       <div className="absolute top-0 right-0 w-full h-full opacity-[0.03] pointer-events-none">
         <svg viewBox="0 0 100 100" className="w-full h-full">

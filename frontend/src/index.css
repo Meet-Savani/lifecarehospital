@@ -54,7 +54,12 @@
 }
 
 html {
-  font-size: 15px; /* Slightly smaller for better fit at 100% zoom */
+  font-size: 16px; 
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 @layer base {

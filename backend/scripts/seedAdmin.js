@@ -8,8 +8,12 @@ import Prescription from '../models/Prescription.js';
 import Unavailability from '../models/Unavailability.js';
 import Doctor from '../models/Doctor.js';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) throw new Error("CRITICAL: MONGODB_URI is not defined in .env");

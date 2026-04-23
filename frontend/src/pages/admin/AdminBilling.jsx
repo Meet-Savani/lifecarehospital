@@ -33,7 +33,8 @@ export default function AdminBilling() {
       </div>
 
       <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
-        <table className="w-full text-sm text-left">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
           <thead className="bg-muted">
             <tr>
               <th className="p-4 font-bold text-muted-foreground w-1/6">Date</th>
@@ -65,6 +66,7 @@ export default function AdminBilling() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </DashboardLayout>
   );

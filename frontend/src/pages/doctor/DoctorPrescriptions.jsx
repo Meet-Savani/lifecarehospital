@@ -120,7 +120,8 @@ export default function DoctorPrescriptions() {
         </header>
 
         <div className="bg-card rounded-[2.5rem] border border-border shadow-sm overflow-hidden">
-          <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-muted text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">
                 <th className="p-8">Patient Identity</th>
@@ -258,6 +259,7 @@ export default function DoctorPrescriptions() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </DashboardLayout>

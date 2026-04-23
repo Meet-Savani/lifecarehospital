@@ -122,7 +122,8 @@ export default function AdminPatients() {
         </header>
 
         <div className="bg-card rounded-[2.5rem] border border-border shadow-2xl shadow-primary/5 overflow-hidden">
-           <table className="w-full text-left">
+           <div className="overflow-x-auto">
+             <table className="w-full text-left">
               <thead>
                  <tr className="bg-muted/50 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] border-b border-border">
                     <th className="p-8 pl-10">Patient Identity</th>
@@ -178,6 +179,7 @@ export default function AdminPatients() {
                  )}
               </tbody>
            </table>
+           </div>
         </div>
       </div>
     </DashboardLayout>

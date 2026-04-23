@@ -2,7 +2,12 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { FAQ } from '../models/Content.js';
 
-dotenv.config();
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) throw new Error("CRITICAL: MONGODB_URI is not defined in .env");

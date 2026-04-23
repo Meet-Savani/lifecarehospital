@@ -94,7 +94,8 @@ export default function DoctorBilling() {
       </div>
 
       <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
-        <table className="w-full text-sm text-left">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
           <thead className="bg-muted">
             <tr>
               <th className="p-4 font-black uppercase text-muted-foreground text-[10px] tracking-widest">Date</th>
@@ -126,6 +127,7 @@ export default function DoctorBilling() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </DashboardLayout>
   );

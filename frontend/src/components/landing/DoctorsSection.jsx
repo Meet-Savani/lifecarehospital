@@ -45,7 +45,7 @@ export default function DoctorsSection() {
   }, [carouselApi]);
 
   return (
-    <section id="doctors" className="py-24 bg-muted/50">
+    <section id="doctors" className="py-16 md:py-24 bg-muted/50">
       <div className="container mx-auto px-4">
         <AnimatedSectionHeader
           badge="Expert Team"
@@ -53,7 +53,7 @@ export default function DoctorsSection() {
           description="Our doctors are leaders in their fields, committed to providing personalized and compassionate care to every patient."
         />
         
-        <div className="relative px-12">
+        <div className="relative px-4 md:px-12">
           <Carousel
             setApi={setCarouselApi}
             opts={{
@@ -115,14 +115,16 @@ export default function DoctorsSection() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious 
-              className="-left-12 h-12 w-12 rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:scale-110 shadow-lg border-none" 
-              variant="default"
-            />
-            <CarouselNext 
-              className="-right-12 h-12 w-12 rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:scale-110 shadow-lg border-none" 
-              variant="default"
-            />
+            <div className="flex justify-center gap-4 mt-8 md:mt-0">
+              <CarouselPrevious 
+                className="static translate-y-0 md:absolute md:-left-12 md:top-1/2 md:-translate-y-1/2 flex h-12 w-12 rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 md:hover:scale-110 shadow-lg border-none" 
+                variant="default"
+              />
+              <CarouselNext 
+                className="static translate-y-0 md:absolute md:-right-12 md:top-1/2 md:-translate-y-1/2 flex h-12 w-12 rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 md:hover:scale-110 shadow-lg border-none" 
+                variant="default"
+              />
+            </div>
           </Carousel>
         </div>
         

@@ -103,7 +103,7 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
           )}
         </Link>
         {!collapsed && onClose && (
-          <button onClick={onClose} className="lg:hidden p-1 rounded-lg text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} className="md:hidden p-1 rounded-lg text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </button>
         )}
@@ -123,27 +123,28 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
               onClick={onClose}
               title={collapsed ? item.label : ""}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 relative group",
+                "flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 relative group overflow-hidden",
                 isActive
                   ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-1"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  : "text-muted-foreground hover:text-white shadow-sm hover:shadow-md",
                 collapsed && "px-0 justify-center"
               )}
             >
-              <div className={cn("p-2 rounded-lg transition-colors", isActive ? "bg-white/20" : "bg-transparent")}>
+              {!isActive && <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out z-0" />}
+              <div className={cn("p-2 rounded-lg transition-colors relative z-10", isActive ? "bg-white/20" : "bg-transparent")}>
                 {item.icon}
               </div>
 
               {showNotify && (
                 <span className={cn(
-                  "bg-red-500 text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 transition-all",
+                  "bg-red-500 text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 transition-all z-10 relative",
                   collapsed ? "absolute top-1 right-1" : ""
                 )}>
                   {count > 99 ? "99+" : count}
                 </span>
               )}
 
-              {!collapsed && <span className="flex-1">{item.label}</span>}
+              {!collapsed && <span className="flex-1 relative z-10">{item.label}</span>}
             </Link>
           );
         })}
@@ -250,21 +251,21 @@ export default function DashboardLayout({ children, role }) {
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed lg:static inset-y-0 left-0 z-50 bg-card border-r border-border flex flex-col transition-all duration-300 shadow-xl lg:shadow-none relative",
-        isCollapsed ? "w-20" : "w-64",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        "fixed md:static inset-y-0 left-0 z-50 bg-card border-r border-border flex flex-col transition-all duration-300 shadow-xl md:shadow-none",
+        isCollapsed ? "w-20 md:w-20" : "w-[80%] max-w-sm md:w-64",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         {/* Toggle Button for Desktop */}
         <button
           onClick={toggleCollapsed}
-          className="hidden lg:flex absolute -right-4 top-10 w-8 h-8 rounded-full bg-card border border-border items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all z-50"
+          className="hidden md:flex absolute -right-4 top-10 w-8 h-8 rounded-full bg-card border border-border items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all z-50"
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -283,7 +284,7 @@ export default function DashboardLayout({ children, role }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Top Bar */}
-        <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-card border-b border-border flex-shrink-0">
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-card border-b border-border flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-xl bg-muted text-foreground hover:bg-primary hover:text-white transition-colors"

@@ -47,19 +47,19 @@ export default function HeroSection({ id }) {
             <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-6 backdrop-blur-sm border border-blue-400/30">
               {role === 'doctor' ? `Welcome Dr. ${user?.fullName?.split(' ')[1] || 'Specialist'}` : `Trusted by ${dbStats?.patients?.toLocaleString() || '1,000'}+ Patients`}
             </span>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-white leading-tight mb-6 tracking-tight drop-shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold text-white leading-tight mb-6 tracking-tight drop-shadow-2xl">
               {role === 'doctor' ? 'Revolutionize Your' : 'Welcome To'} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-emerald-300">
                 {role === 'doctor' ? 'Clinical Practice' : 'LIOHNS Hospital'}
               </span>
             </h1>
-            <p className="text-xl text-blue-100/90 mb-10 max-w-2xl leading-relaxed drop-shadow-lg">
+            <p className="text-lg sm:text-xl text-blue-100/90 mb-10 max-w-2xl leading-relaxed drop-shadow-lg">
               {role === 'doctor' 
                 ? 'Access your clinical dashboard, manage patient schedules, and streamline your medical consultations with our integrated healthcare platform.'
                 : 'We are open 24/7 at your service. Advanced Super Specialty Care for ENT, Neurology, Neurosurgery, Oncosurgery, Opthalmology, Dental sciences, Dermatology, Plastic Surgery, Psychiatry, Pulmonary and More...'}
             </p>
             
-            <div className="flex flex-wrap gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-12">
               {role === 'doctor' ? (
                 <>
                   <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400 }}>
@@ -80,8 +80,8 @@ export default function HeroSection({ id }) {
                   </Button>
                 </motion.div>
               ) : (
-                <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400 }}>
-                  <Button size="lg" className="bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl transition-shadow" onClick={() => navigate("/patient/book")}>
+                <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400 }} className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto bg-white text-blue-900 hover:bg-blue-50 px-8 h-14 text-lg font-semibold shadow-xl transition-shadow" onClick={() => navigate("/patient/book")}>
                     <CalendarPlus className="mr-2 h-5 w-5" /> Book Appointment
                   </Button>
                 </motion.div>
@@ -107,7 +107,7 @@ export default function HeroSection({ id }) {
                 >
                   <Button
                     size="lg"
-                    className="relative overflow-hidden bg-transparent border-2 border-white/50 text-white px-8 h-14 text-lg font-black rounded-full tracking-wide uppercase flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto relative overflow-hidden bg-transparent border-2 border-white/50 text-white px-8 h-14 text-lg font-black rounded-full tracking-wide uppercase flex items-center justify-center gap-2"
                     onClick={() => setEmergencyOpen(true)}
                   >
                     <motion.span
@@ -122,7 +122,7 @@ export default function HeroSection({ id }) {
               }
             </div>
 
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-white/10">
               {[
                 { icon: <ShieldCheck className="h-5 w-5 text-emerald-400" />, value: "ISO Certified", label: "Safety standards" },
                 { icon: <Star className="h-5 w-5 text-yellow-400" />, value: "4.9/5 Rating", label: "Patient satisfaction" },
@@ -134,9 +134,9 @@ export default function HeroSection({ id }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1 + i * 0.15, duration: 0.5 }}
                   whileHover={{ scale: 1.05 }}
-                  className="text-white cursor-default"
+                  className="text-white cursor-default text-center sm:text-left"
                 >
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
                     {stat.icon}
                     <span className="font-bold text-lg">{stat.value}</span>
                   </div>

@@ -42,7 +42,7 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20 bg-background">
+    <section id="contact" className="py-16 md:py-20 bg-background">
       <div className="container mx-auto px-4">
         <AnimatedSectionHeader
           badge="Get In Touch"

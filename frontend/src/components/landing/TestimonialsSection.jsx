@@ -26,7 +26,7 @@ export default function TestimonialsSection() {
   const items = testimonials || [];
 
   return (
-    <section className="py-24 bg-muted relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-muted relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white to-transparent" />
       
       <div className="container mx-auto px-4 relative z-10">

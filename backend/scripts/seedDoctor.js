@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import User from '../models/User.js';
 import Doctor from '../models/Doctor.js';
 
-dotenv.config({ path: 'backend/.env' });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) throw new Error("CRITICAL: MONGODB_URI is not defined in .env");

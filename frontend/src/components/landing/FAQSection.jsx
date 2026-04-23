@@ -31,7 +31,7 @@ export default function FAQSection() {
   const items = faq || [];
 
   return (
-    <section id="faq" className="py-24 bg-background relative">
+    <section id="faq" className="py-16 md:py-24 bg-background relative">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex flex-col md:flex-row gap-12 items-start">
           <motion.div 
@@ -78,10 +78,10 @@ export default function FAQSection() {
                     value={String(f.id || i)} 
                     className="bg-muted rounded-2xl border-none px-6 hover:bg-muted/80 transition-colors data-[state=open]:bg-card data-[state=open]:shadow-sm"
                   >
-                    <AccordionTrigger className="text-lg font-bold text-foreground hover:no-underline py-6">
+                    <AccordionTrigger className="text-lg font-bold text-foreground hover:no-underline py-6 text-left">
                       {f.question}
                     </AccordionTrigger>
-                    <AccordionContent className="text-foreground/70 leading-relaxed pb-6 text-base">
+                    <AccordionContent className="text-foreground/70 leading-relaxed pb-6 text-base text-left">
                       {f.answer}
                     </AccordionContent>
                   </AccordionItem>

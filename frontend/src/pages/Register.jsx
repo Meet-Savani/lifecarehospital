@@ -140,7 +140,7 @@ export default function Register() {
                   className="rounded-xl h-11"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2 text-left">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">

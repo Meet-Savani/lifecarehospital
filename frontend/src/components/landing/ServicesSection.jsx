@@ -50,7 +50,7 @@ export default function ServicesSection() {
   const items = services || [];
 
   return (
-    <section id="services" className="py-24 bg-background relative overflow-hidden">
+    <section id="services" className="py-16 md:py-24 bg-background relative overflow-hidden">
       {/* Background decoration */}
       <div
         className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl"

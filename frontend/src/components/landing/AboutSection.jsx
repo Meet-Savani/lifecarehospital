@@ -127,7 +127,7 @@ export default function AboutSection() {
           </motion.div>
         </div>
 
-        <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-8" stagger={0.12}>
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" stagger={0.12}>
           {displayStats.map((s, i) => (
             <motion.div 
               key={s.label}
@@ -139,11 +139,11 @@ export default function AboutSection() {
               <motion.div
                 whileHover={{ scale: 1.15, rotate: 10 }}
                 transition={{ type: "spring", stiffness: 400 }}
-                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-background text-foreground shadow-sm mb-6"
+                className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-background text-foreground shadow-sm mb-4 md:mb-6"
               >
                 <span className="text-primary">{s.icon}</span>
               </motion.div>
-              <div className="text-3xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{s.value}</div>
+              <div className="text-2xl md:text-3xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{s.value}</div>
               <div className="text-sm font-semibold text-foreground/60 uppercase tracking-wider">{s.label}</div>
             </motion.div>
           ))}
