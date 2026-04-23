@@ -43,6 +43,20 @@ const MessageBubble = ({ m, isMe, onSelectMedia, onDownload }) => {
       }`}>
         {m.type === "text" && <div className="p-4"><p className="text-sm font-medium leading-relaxed">{m.message}</p></div>}
         
+        {m.type === "call" && (
+            <div className="p-4 flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isMe ? "bg-white/20" : "bg-slate-100"}`}>
+                    {m.message.includes("Video") ? <VideoIcon className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+                </div>
+                <div>
+                    <p className="text-sm font-bold">{m.message}</p>
+                    <p className={`text-[10px] ${isMe ? "text-white/60" : "text-slate-400"}`}>
+                        {format(new Date(m.createdAt), 'hh:mm a')}
+                    </p>
+                </div>
+            </div>
+        )}
+
         {m.type === "image" && (
             <div className={`space-y-2 w-[220px] p-2 ${isMe ? "bg-white/5" : "bg-slate-50/50"}`}>
               <div className="relative rounded-xl overflow-hidden cursor-zoom-in group/img border border-border/50" onClick={() => onSelectMedia(m)}>
@@ -100,9 +114,12 @@ const MessageBubble = ({ m, isMe, onSelectMedia, onDownload }) => {
   );
 };
 
+import { useCall } from "@/contexts/CallContext";
+
 export default function ConsultationChats() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { callUser } = useCall();
   const queryClient = useQueryClient();
   const { appointmentId } = useParams();
   const navigate = useNavigate();
@@ -217,9 +234,7 @@ export default function ConsultationChats() {
   const initGlobalCall = (type) => {
     const otherParticipant = getOtherParticipant(selectedChat);
     if (!otherParticipant) return;
-    window.dispatchEvent(new CustomEvent("init_call", { 
-      detail: { otherUserId: otherParticipant._id, type }
-    }));
+    callUser(otherParticipant._id, otherParticipant.fullName, type, selectedChat._id);
   };
 
   const triggerFileUpload = (type) => {

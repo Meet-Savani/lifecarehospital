@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 
 let io;
-const users = {};
+const users = {}; // userId -> [socketId1, socketId2, ...]
 
 export const initSocket = (server) => {
   io = new Server(server, {
@@ -14,12 +14,18 @@ export const initSocket = (server) => {
   io.on('connection', (socket) => {
     socket.on('register_user', (userId) => {
       if (userId) {
-        users[userId] = socket.id;
+        if (!users[userId]) {
+          users[userId] = [];
+        }
+        if (!users[userId].includes(socket.id)) {
+          users[userId].push(socket.id);
+        }
         socket.join(userId);
       }
     });
 
     socket.on('join_chat', (chatId) => {
+      socket.pushId = socket.id; // Just for internal reference if needed
       socket.join(chatId);
     });
 
@@ -35,19 +41,36 @@ export const initSocket = (server) => {
       socket.to(chatId).emit('user_typing', { userId });
     });
 
-    // Video Call Signaling
-    socket.on('call_user', ({ userToCall, signalData, from, name }) => {
-      io.to(userToCall).emit('incoming_call', { signal: signalData, from, name });
+    // --- Video/Audio Call Signaling ---
+    
+    // Caller initiates a call
+    socket.on('call_user', ({ userToCall, signalData, from, name, callType }) => {
+      console.log(`Call from ${from} to ${userToCall} (${callType})`);
+      // Emit to all devices of the receiver
+      io.to(userToCall).emit('incoming_call', { signal: signalData, from, name, callType });
     });
 
+    // Receiver accepts the call
     socket.on('answer_call', (data) => {
-      io.to(data.to).emit('call_accepted', data.signal);
+      console.log(`Call accepted by ${data.to}`);
+      // Emit to all devices of the caller (signaling)
+      io.to(data.to).emit('call_accepted', { signal: data.signal, answererId: data.answererId });
+      
+      // Notify other devices of the receiver that the call was accepted elsewhere
+      socket.to(data.receiverId).emit('call_accepted_elsewhere', { by: socket.id });
     });
 
+    // Caller cancels before acceptance
+    socket.on('cancel_call', ({ to }) => {
+      io.to(to).emit('call_cancelled');
+    });
+
+    // Either side ends the call
     socket.on('end_call', ({ to }) => {
       io.to(to).emit('call_ended');
     });
 
+    // Receiver rejects the call
     socket.on('reject_call', ({ to }) => {
       io.to(to).emit('call_rejected');
     });
@@ -57,8 +80,11 @@ export const initSocket = (server) => {
     });
 
     socket.on('disconnect', () => {
-      Object.keys(users).forEach(key => {
-        if (users[key] === socket.id) delete users[key];
+      Object.keys(users).forEach(userId => {
+        users[userId] = users[userId].filter(id => id !== socket.id);
+        if (users[userId].length === 0) {
+          delete users[userId];
+        }
       });
     });
   });

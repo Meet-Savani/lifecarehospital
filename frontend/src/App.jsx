@@ -148,6 +148,11 @@ function AuthWrappedApp() {
 
 import ScrollToTop from "./components/layout/ScrollToTop";
 
+import { SocketProvider } from "@/contexts/SocketContext";
+import { CallProvider } from "@/contexts/CallContext";
+import IncomingCall from "@/components/calling/IncomingCall";
+import CallInterface from "@/components/calling/CallInterface";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -158,7 +163,11 @@ const App = () => (
         <ThemeProvider>
           <AuthProvider>
             <SocketProvider>
-              <AuthWrappedApp />
+              <CallProvider>
+                <AuthWrappedApp />
+                <IncomingCall />
+                <CallInterface />
+              </CallProvider>
             </SocketProvider>
           </AuthProvider>
         </ThemeProvider>

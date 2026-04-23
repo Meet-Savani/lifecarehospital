@@ -15,6 +15,7 @@ import chatRoutes from './routes/chat.js';
 import prescriptionRoutes from './routes/prescriptions.js';
 import adminRoutes from './routes/admin.js';
 import contactRoutes from './routes/contact.js';
+import callRoutes from './routes/call.js';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/calls', callRoutes);
 
 // Initialize Socket
 initSocket(server);

@@ -225,6 +225,14 @@ export const updatePatientVitals = async (req, res) => {
     });
 
     await patient.save();
+
+    // Real-time Update
+    try {
+      const { getIO } = await import('../socket.js');
+      const io = getIO();
+      io.to(patient._id.toString()).emit('data_updated', { type: 'vitals', patientId: patient._id });
+    } catch (sErr) {}
+
     res.json({ message: 'Vitals updated successfully', healthMetrics: patient.healthMetrics });
   } catch (error) {
     res.status(500).json({ message: error.message });

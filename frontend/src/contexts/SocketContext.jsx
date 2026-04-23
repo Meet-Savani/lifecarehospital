@@ -46,6 +46,9 @@ export function SocketProvider({ children }) {
           queryClient.invalidateQueries({ queryKey: ['booked-slots'] });
         } else if (data.type === 'payments') {
           queryClient.invalidateQueries({ queryKey: ['payments'] });
+        } else if (data.type === 'vitals') {
+          queryClient.invalidateQueries({ queryKey: ['me'] });
+          queryClient.invalidateQueries({ queryKey: ['patient-data', data.patientId] });
         }
       });
 
