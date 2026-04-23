@@ -5,8 +5,8 @@ import api from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { 
-  Plus, FileText, Calendar, Trash2, Pill, Info, 
-  MapPin, Clock, AlertCircle
+  Plus, FileText, Trash2, Pill,
+  Activity
 } from "lucide-react";
 import { 
   Dialog, DialogContent, DialogHeader, 
@@ -19,7 +19,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function DoctorPrescriptions() {
   const { user } = useAuth();
@@ -48,7 +49,7 @@ export default function DoctorPrescriptions() {
   const { data: appointments } = useQuery({
     queryKey: ["doctor-appointed-patients"],
     queryFn: async () => {
-      const response = await api.get("/appointments/appointments"); // Reusing same endpoint as doctor appointments
+      const response = await api.get("/appointments/appointments");
       return response.data || [];
     },
   });
@@ -69,7 +70,7 @@ export default function DoctorPrescriptions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctor-appointed-patients"] });
       queryClient.invalidateQueries({ queryKey: ["all-prescriptions"] });
-      toast({ title: existingPrescId ? "Prescription Updated" : "Prescription Recorded", description: "The patient has been notified." });
+      toast({ title: existingPrescId ? "Prescription Updated" : "Prescription Recorded" });
       setSelectedAppt(null);
       resetForm();
     },
@@ -109,7 +110,7 @@ export default function DoctorPrescriptions() {
     dosage: { morning: false, noon: false, evening: false }, 
     mealTiming: "After Meal", 
     description: "",
-    isAdded: !!existingPrescId // If updating, mark new ones as added
+    isAdded: !!existingPrescId
   }]);
   
   const removeMedicine = (index) => setMedicines(medicines.filter((_, i) => i !== index));
@@ -129,11 +130,7 @@ export default function DoctorPrescriptions() {
     <DashboardLayout role="doctor">
       <div className="space-y-10">
         <header>
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-4xl font-black text-foreground tracking-tight"
-          >
+          <motion.h1 className="text-4xl font-black text-foreground tracking-tight">
             Medical <span className="text-primary italic">Prescriptions</span>
           </motion.h1>
           <p className="text-muted-foreground font-medium mt-2">Issue structured pharmaceutical records for completed consultations.</p>
@@ -151,7 +148,7 @@ export default function DoctorPrescriptions() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-base">
-              {appointments?.length === 0 ? (
+              {!appointments || appointments.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="p-20 text-center">
                     <FileText className="w-16 h-16 text-slate-200 mx-auto mb-4" />
@@ -159,13 +156,10 @@ export default function DoctorPrescriptions() {
                   </td>
                 </tr>
               ) : (
-                appointments?.map((appt, i) => {
+                appointments.map((appt) => {
                   const isCompleted = appt.status === 'completed';
                   return (
-                    <motion.tr 
-                      key={appt._id} 
-                      className="group hover:bg-muted/30 transition-colors"
-                    >
+                    <tr key={appt._id} className="group hover:bg-muted/30 transition-colors">
                       <td className="p-8">
                         <div className="flex items-center gap-5">
                           <div className="w-12 h-12 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center text-primary font-black text-lg">
@@ -181,100 +175,89 @@ export default function DoctorPrescriptions() {
                         {new Date(appt.date).toLocaleDateString()}
                       </td>
                       <td className="p-8">
-                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-widest ${
+                        <span className={cn(
+                          "text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-widest",
                           appt.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : 
-                          appt.status === 'approved' ? 'bg-blue-500/10 text-blue-500' : 'bg-muted text-muted-foreground'
-                        }`}>
+                          appt.status === 'pending' ? 'bg-orange-500/10 text-orange-500' : 
+                          appt.status === 'rejected' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'
+                        )}>
                           {appt.status}
                         </span>
                       </td>
                       <td className="p-8 text-right">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span>
-                                <Dialog open={selectedAppt?._id === appt._id} onOpenChange={(open) => !open && setSelectedAppt(null)}>
-                                  <DialogTrigger asChild>
-                                      <Button 
-                                        disabled={!isCompleted}
-                                        onClick={() => handleSelectAppt(appt)}
-                                        className="rounded-2xl h-12 px-6 bg-foreground dark:bg-slate-800 hover:bg-foreground/90 dark:hover:bg-slate-700 text-background dark:text-foreground shadow-xl shadow-primary/5 font-black uppercase text-[10px] tracking-widest gap-2 disabled:opacity-60"
-                                      >
-                                      {prescriptions?.some(p => p.appointmentId?._id === appt._id) ? "Update" : "Prescribe"}
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-4xl rounded-[3rem] border-border bg-card p-10 overflow-y-auto max-h-[90vh]">
-                                    <DialogHeader className="mb-8">
-                                      <div className="flex items-center gap-6">
-                                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                                          <Pill className="w-8 h-8 text-primary" />
-                                        </div>
-                                        <div>
-                                            <DialogTitle className="text-2xl font-black text-foreground tracking-tight">{existingPrescId ? "Medical Update" : "Standardized Prescription"}</DialogTitle>
-                                            <DialogDescription className="text-muted-foreground font-medium text-sm">
-                                              Case Ref: {appt._id.slice(-8).toUpperCase()} - Patient: {appt.patientId?.fullName}
-                                            </DialogDescription>
-                                        </div>
-                                      </div>
-                                    </DialogHeader>
+                        <Dialog open={selectedAppt?._id === appt._id} onOpenChange={(open) => !open && setSelectedAppt(null)}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              disabled={!isCompleted}
+                              onClick={() => handleSelectAppt(appt)}
+                              className="rounded-2xl h-12 px-6 bg-foreground dark:bg-slate-800 hover:bg-foreground/90 dark:hover:bg-slate-700 text-background dark:text-foreground shadow-xl shadow-primary/5 font-black uppercase text-[10px] tracking-widest gap-2 disabled:opacity-60"
+                            >
+                              {prescriptions?.some(p => p.appointmentId?._id === appt._id) ? "Update" : "Prescribe"}
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl rounded-[3rem] border-border bg-card p-10 overflow-y-auto max-h-[90vh]">
+                            <DialogHeader className="mb-8">
+                              <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                  <Pill className="w-8 h-8 text-primary" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-2xl font-black text-foreground tracking-tight">{existingPrescId ? "Medical Update" : "Standardized Prescription"}</DialogTitle>
+                                    <DialogDescription className="text-muted-foreground font-medium text-sm">
+                                      Case Ref: {appt._id.slice(-8).toUpperCase()} - Patient: {appt.patientId?.fullName}
+                                    </DialogDescription>
+                                </div>
+                              </div>
+                            </DialogHeader>
 
-                                    <div className="space-y-8">
-                                      <div className="space-y-6">
-                                        <div className="flex items-center justify-between border-b border-border pb-4">
-                                          <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Medication Schedule</Label>
-                                          <Button onClick={addMedicine} variant="outline" className="rounded-xl h-10 px-4 text-primary font-black uppercase text-[10px] tracking-widest gap-2 bg-primary/5 border-primary/10 hover:bg-primary/10">
-                                            <Plus className="w-4 h-4" /> Add Next Medicine
-                                          </Button>
-                                        </div>
+                            <div className="space-y-8">
+                              <div className="space-y-6">
+                                <div className="flex items-center justify-between border-b border-border pb-4">
+                                  <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Medication Schedule</Label>
+                                  <Button onClick={addMedicine} variant="outline" className="rounded-xl h-10 px-4 text-primary font-black uppercase text-[10px] tracking-widest gap-2 bg-primary/5 border-primary/10 hover:bg-primary/10">
+                                    <Plus className="w-4 h-4" /> Add Next Medicine
+                                  </Button>
+                                </div>
 
-                                        <div className="space-y-6">
-                                          {medicines.map((med, idx) => (
-                                            <CardMedicine 
-                                              key={idx} 
-                                              idx={idx} 
-                                              med={med} 
-                                              updateMedicine={updateMedicine} 
-                                              removeMedicine={removeMedicine} 
-                                              canRemove={medicines.length > 1}
-                                            />
-                                          ))}
-                                        </div>
-                                      </div>
+                                <div className="space-y-6">
+                                  {medicines.map((med, idx) => (
+                                    <CardMedicine 
+                                      key={idx} 
+                                      idx={idx} 
+                                      med={med} 
+                                      updateMedicine={updateMedicine} 
+                                      removeMedicine={removeMedicine} 
+                                      canRemove={medicines.length > 1}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
 
-                                      <div className="space-y-3">
-                                        <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1 italic">Clinical Summary / Advice</Label>
-                                        <Textarea 
-                                          placeholder="Enter dietary restrictions, resting period, or specific follow-up instructions..." 
-                                          value={generalNotes}
-                                          onChange={(e) => setGeneralNotes(e.target.value)}
-                                          className="rounded-3xl border-border bg-muted/30 min-h-[100px] p-6 font-medium text-foreground focus:bg-background transition-all shadow-inner"
-                                        />
-                                      </div>
-                                    </div>
+                              <div className="space-y-3">
+                                <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1 italic">Clinical Summary / Advice</Label>
+                                <Textarea 
+                                  placeholder="Enter dietary restrictions, resting period, or specific follow-up instructions..." 
+                                  value={generalNotes}
+                                  onChange={(e) => setGeneralNotes(e.target.value)}
+                                  className="rounded-3xl border-border bg-muted/30 min-h-[100px] p-6 font-medium text-foreground focus:bg-background transition-all shadow-inner"
+                                />
+                              </div>
+                            </div>
 
-                                    <DialogFooter className="mt-10">
-                                      <Button 
-                                        onClick={() => prescribeMutation.mutate()}
-                                        disabled={prescribeMutation.isPending || medicines.some(m => !m.name || m.name.toLowerCase() === 'none')}
-                                        className="w-full h-16 rounded-2xl bg-primary text-white hover:bg-primary/90 transition-all font-black text-base shadow-2xl shadow-primary/20"
-                                      >
-                                        {prescribeMutation.isPending ? "Validating & Transmitting..." : existingPrescId ? "Commit Changes & Update Records" : "Generate Prescription & Commit Records"}
-                                      </Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
-                              </span>
-                            </TooltipTrigger>
-                            {!isCompleted && (
-                              <TooltipContent className="bg-foreground text-background border-none rounded-xl px-4 py-2 text-xs font-bold">
-                                Prescription can only be added after appointment is completed
-                              </TooltipContent>
-                            )}
-                          </Tooltip>
-                        </TooltipProvider>
+                            <DialogFooter className="mt-10">
+                              <Button 
+                                onClick={() => prescribeMutation.mutate()}
+                                disabled={prescribeMutation.isPending || medicines.some(m => !m.name || m.name.toLowerCase() === 'none')}
+                                className="w-full h-16 rounded-2xl bg-primary text-white hover:bg-primary/90 transition-all font-black text-base shadow-2xl shadow-primary/20"
+                              >
+                                {prescribeMutation.isPending ? "Validating & Transmitting..." : existingPrescId ? "Commit Changes & Update Records" : "Generate Prescription & Commit Records"}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </td>
-                    </motion.tr>
-                  )
+                    </tr>
+                  );
                 })
               )}
             </tbody>
@@ -286,50 +269,37 @@ export default function DoctorPrescriptions() {
   );
 }
 
-// I will just write a clean CardMedicine function
-
 function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Autocomplete fetcher
   useEffect(() => {
     const fetchMeds = async () => {
       if (!med.name || med.name.length < 2 || !showSuggestions) {
         setSuggestions([]);
-        setIsSearching(false);
         return;
       }
       setIsSearching(true);
-      const basicMeds = ["Paracetamol", "Ibuprofen", "Amoxicillin", "Azithromycin", "Aspirin", "Metformin", "Omeprazole", "Cetirizine"].filter(m => m.toLowerCase().includes(med.name.toLowerCase()));
-      
       try {
         const res = await fetch(`https://api.fda.gov/drug/ndc.json?search=brand_name:${med.name}*&limit=8`);
         if (res.ok) {
           const data = await res.json();
           const names = data.results.map(r => r.brand_name).filter(Boolean);
-          setSuggestions([...new Set([...basicMeds, ...names])]);
-        } else {
-          setSuggestions(basicMeds);
+          setSuggestions([...new Set(names)]);
         }
       } catch {
-        setSuggestions(basicMeds);
+        setSuggestions([]);
       } finally {
         setIsSearching(false);
       }
     };
-    
     const timeoutId = setTimeout(fetchMeds, 400);
     return () => clearTimeout(timeoutId);
   }, [med.name, showSuggestions]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-8 bg-muted/40 rounded-[2.5rem] border border-border space-y-8 relative group"
-    >
+    <div className="p-8 bg-muted/40 rounded-[2.5rem] border border-border space-y-8 relative group">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-3 relative z-20">
           <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Substance Name</Label>
@@ -344,24 +314,20 @@ function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             className="h-14 rounded-2xl bg-background border-border font-bold focus:ring-primary/20 shadow-sm"
           />
-          {showSuggestions && (suggestions.length > 0 || isSearching) && (
+          {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-card shadow-xl rounded-2xl border border-border max-h-48 overflow-y-auto z-50 p-2">
-              {isSearching ? (
-                <div className="p-3 text-xs text-muted-foreground font-bold text-center">Searching OpenFDA...</div>
-              ) : (
-                suggestions.map((s, i) => (
-                  <div 
-                    key={i} 
-                    className="px-4 py-3 hover:bg-primary/5 cursor-pointer rounded-xl text-sm font-bold text-foreground transition-colors"
-                    onClick={() => {
-                      updateMedicine(idx, 'name', s);
-                      setShowSuggestions(false);
-                    }}
-                  >
-                    {s}
-                  </div>
-                ))
-              )}
+              {suggestions.map((s, i) => (
+                <div 
+                  key={i} 
+                  className="px-4 py-3 hover:bg-primary/5 cursor-pointer rounded-xl text-sm font-bold text-foreground transition-colors"
+                  onClick={() => {
+                    updateMedicine(idx, 'name', s);
+                    setShowSuggestions(false);
+                  }}
+                >
+                  {s}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -432,6 +398,6 @@ function CardMedicine({ idx, med, updateMedicine, removeMedicine, canRemove }) {
           <Trash2 className="w-4 h-4" />
         </Button>
       )}
-    </motion.div>
+    </div>
   );
 }
