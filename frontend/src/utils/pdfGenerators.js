@@ -84,10 +84,27 @@ export const generatePrescriptionPDF = (presc) => {
 
     // Medicine rows
     presc.medicines?.forEach((med, idx) => {
-      const rowHeight = 16;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      
+      const medName = med.isAdded ? `${med.name} (added)` : med.name;
+      const nameLines = pdf.splitTextToSize(medName, 50); // Wrap within name column
+      const rowHeight = Math.max(16, (nameLines.length * 5) + 8);
+
       if (y + rowHeight > pageHeight - 30) {
         pdf.addPage();
         y = 20;
+        
+        // Re-draw table header on new page
+        pdf.setFillColor(37, 99, 235);
+        pdf.roundedRect(15, y, pageWidth - 30, 12, 3, 3, "F");
+        pdf.setTextColor(255, 255, 255);
+        pdf.text("Medication Name", 20, y + 8);
+        pdf.text("Qty", 75, y + 8);
+        pdf.text("Dosage Schedule", 90, y + 8);
+        pdf.text("Duration", 140, y + 8);
+        pdf.text("Timing", 165, y + 8);
+        y += 15;
       }
 
       const bgColor = idx % 2 === 0 ? [248, 250, 252] : [255, 255, 255];
@@ -95,9 +112,7 @@ export const generatePrescriptionPDF = (presc) => {
       pdf.rect(15, y, pageWidth - 30, rowHeight, "F");
 
       pdf.setTextColor(30, 41, 59);
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(med.name, 20, y + 7);
+      pdf.text(nameLines, 20, y + 7);
 
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
@@ -116,7 +131,8 @@ export const generatePrescriptionPDF = (presc) => {
       if (med.description) {
          pdf.setFontSize(7);
          pdf.setTextColor(148, 163, 184);
-         pdf.text(`Note: ${med.description}`, 20, y + 12);
+         const descLines = pdf.splitTextToSize(`Note: ${med.description}`, pageWidth - 40);
+         pdf.text(descLines, 20, y + rowHeight - (descLines.length * 3));
       }
 
       y += rowHeight;

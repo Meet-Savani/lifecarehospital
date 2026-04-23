@@ -209,11 +209,13 @@ export const updatePatientVitals = async (req, res) => {
       return res.status(404).json({ message: 'Patient not found' });
     }
 
-    // Update current metrics
-    patient.healthMetrics.bloodPressure = bloodPressure || patient.healthMetrics.bloodPressure;
-    patient.healthMetrics.heartRate = heartRate || patient.healthMetrics.heartRate;
-    patient.healthMetrics.glucose = glucose || patient.healthMetrics.glucose;
-    patient.healthMetrics.temperature = temperature || patient.healthMetrics.temperature;
+    // Update current metrics with strict validation
+    const isValidNum = (val) => val !== null && val !== undefined && val !== "" && !isNaN(Number(val));
+    
+    patient.healthMetrics.bloodPressure = bloodPressure || patient.healthMetrics.bloodPressure || "0/0";
+    patient.healthMetrics.heartRate = isValidNum(heartRate) ? Number(heartRate) : (patient.healthMetrics.heartRate || 0);
+    patient.healthMetrics.glucose = isValidNum(glucose) ? Number(glucose) : (patient.healthMetrics.glucose || 0);
+    patient.healthMetrics.temperature = isValidNum(temperature) ? Number(temperature) : (patient.healthMetrics.temperature || 0);
 
     // Push to history
     patient.healthMetrics.history.push({

@@ -35,6 +35,7 @@ export const CallProvider = ({ children }) => {
   const timerRef = useRef();
   const localStreamRef = useRef();
   const timeoutRef = useRef();
+  const pendingCandidates = useRef([]);
   
   const incomingRing = useRef(new Audio(INCOMING_RING_URL));
   const outgoingRing = useRef(new Audio(OUTGOING_RING_URL));
@@ -84,6 +85,7 @@ export const CallProvider = ({ children }) => {
     }
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (timerRef.current) clearInterval(timerRef.current);
+    pendingCandidates.current = [];
   }, [stopSounds]);
 
   useEffect(() => {
@@ -100,6 +102,11 @@ export const CallProvider = ({ children }) => {
       if (connectionRef.current) {
         try {
             await connectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+            // Process buffered candidates
+            while (pendingCandidates.current.length > 0) {
+                const candidate = pendingCandidates.current.shift();
+                await connectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+            }
         } catch (e) {
             console.error("Error setting remote description:", e);
         }
@@ -127,15 +134,18 @@ export const CallProvider = ({ children }) => {
     on('ice_candidate', async ({ candidate }) => {
       if (connectionRef.current) {
         try {
-            if (connectionRef.current.remoteDescription) {
+            if (connectionRef.current.remoteDescription && connectionRef.current.remoteDescription.type) {
                 await connectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
             } else {
                 console.log("Buffering ICE candidate as remote description is not set");
-                // In some cases we might need a buffer, but simple catch is often enough
+                pendingCandidates.current.push(candidate);
             }
         } catch (e) {
             console.error("Error adding ICE candidate:", e);
         }
+      } else {
+        console.log("Buffering ICE candidate as connection is not initialized");
+        pendingCandidates.current.push(candidate);
       }
     });
 
@@ -211,7 +221,7 @@ export const CallProvider = ({ children }) => {
 
     try {
         const localStream = await navigator.mediaDevices.getUserMedia({
-            video: call.callType === 'video' || isVideoOff === false,
+            video: call.callType === 'video',
             audio: true
         });
         
@@ -258,19 +268,33 @@ export const CallProvider = ({ children }) => {
   const answerCall = async () => {
     stopSounds();
     const peerConnection = await setupWebRTC(false);
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(call.signal));
     
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
+    try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(call.signal));
+        
+        // Process buffered candidates
+        while (pendingCandidates.current.length > 0) {
+            const candidate = pendingCandidates.current.shift();
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => 
+                console.error("Error adding buffered candidate:", e)
+            );
+        }
 
-    setCall(prev => ({ ...prev, status: 'connected' }));
-    
-    emit('answer_call', { 
-        signal: answer, 
-        to: call.from, 
-        answererId: user._id,
-        receiverId: user._id
-    });
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        setCall(prev => ({ ...prev, status: 'connected' }));
+        
+        emit('answer_call', { 
+            signal: answer, 
+            to: call.from, 
+            answererId: user._id,
+            receiverId: user._id
+        });
+    } catch (e) {
+        console.error("Error in answerCall:", e);
+        resetCallState();
+    }
   };
 
   const rejectCall = () => {

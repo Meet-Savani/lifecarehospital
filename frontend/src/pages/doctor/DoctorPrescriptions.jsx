@@ -26,50 +26,38 @@ export default function DoctorPrescriptions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedAppt, setSelectedAppt] = useState(null);
-  const [medicines, setMedicines] = useState([{ 
-    name: "", 
-    quantity: "",
-    dosage: { morning: false, noon: false, evening: false }, 
-    mealTiming: "After Meal", 
-    description: "" 
-  }]);
-  const [generalNotes, setGeneralNotes] = useState("");
+  const [existingPrescId, setExistingPrescId] = useState(null);
 
-  const { data: doctor } = useQuery({
-    queryKey: ["doctor-self-presc", user?._id],
+  const { data: prescriptions } = useQuery({
+    queryKey: ["all-prescriptions"],
     queryFn: async () => {
-      const response = await api.get("/appointments/doctor/me");
-      return response.data;
-    },
-    enabled: !!user,
-  });
-
-  const { data: appointments, isLoading } = useQuery({
-    queryKey: ["doctor-appointed-patients", doctor?._id],
-    queryFn: async () => {
-      const response = await api.get("/appointments/appointments");
-      // Displaying all, but button control is handled in UI
+      const response = await api.get("/prescriptions");
       return response.data || [];
     },
-    enabled: !!doctor,
   });
 
   const prescribeMutation = useMutation({
     mutationFn: async () => {
-      await api.post("/prescriptions", {
+      const payload = {
         appointmentId: selectedAppt._id,
         medicines,
         generalNotes,
-      });
+      };
+      if (existingPrescId) {
+        await api.put(`/prescriptions/${existingPrescId}`, payload);
+      } else {
+        await api.post("/prescriptions", payload);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctor-appointed-patients"] });
-      toast({ title: "Prescription Recorded", description: "The patient has been notified." });
+      queryClient.invalidateQueries({ queryKey: ["all-prescriptions"] });
+      toast({ title: existingPrescId ? "Prescription Updated" : "Prescription Recorded", description: "The patient has been notified." });
       setSelectedAppt(null);
       resetForm();
     },
     onError: (err) => {
-      toast({ title: "Prescription Failed", description: err.message, variant: "destructive" });
+      toast({ title: "Operation Failed", description: err.message, variant: "destructive" });
     }
   });
 
@@ -79,9 +67,23 @@ export default function DoctorPrescriptions() {
       quantity: "",
       dosage: { morning: false, noon: false, evening: false }, 
       mealTiming: "After Meal", 
-      description: "" 
+      description: "",
+      isAdded: false
     }]);
     setGeneralNotes("");
+    setExistingPrescId(null);
+  };
+
+  const handleSelectAppt = (appt) => {
+    const existing = prescriptions?.find(p => p.appointmentId?._id === appt._id);
+    if (existing) {
+      setExistingPrescId(existing._id);
+      setMedicines(existing.medicines.map(m => ({ ...m, isAdded: false })));
+      setGeneralNotes(existing.generalNotes || "");
+    } else {
+      resetForm();
+    }
+    setSelectedAppt(appt);
   };
 
   const addMedicine = () => setMedicines([...medicines, { 
@@ -89,7 +91,8 @@ export default function DoctorPrescriptions() {
     quantity: "",
     dosage: { morning: false, noon: false, evening: false }, 
     mealTiming: "After Meal", 
-    description: "" 
+    description: "",
+    isAdded: !!existingPrescId // If updating, mark new ones as added
   }]);
   
   const removeMedicine = (index) => setMedicines(medicines.filter((_, i) => i !== index));
@@ -177,10 +180,10 @@ export default function DoctorPrescriptions() {
                                   <DialogTrigger asChild>
                                       <Button 
                                         disabled={!isCompleted}
-                                        onClick={() => setSelectedAppt(appt)}
+                                        onClick={() => handleSelectAppt(appt)}
                                         className="rounded-2xl h-12 px-6 bg-foreground dark:bg-slate-800 hover:bg-foreground/90 dark:hover:bg-slate-700 text-background dark:text-foreground shadow-xl shadow-primary/5 font-black uppercase text-[10px] tracking-widest gap-2 disabled:opacity-60"
                                       >
-                                      <Plus className="w-4 h-4" /> Prescribe
+                                      {prescriptions?.some(p => p.appointmentId?._id === appt._id) ? "Update" : "Prescribe"}
                                     </Button>
                                   </DialogTrigger>
                                   <DialogContent className="max-w-4xl rounded-[3rem] border-border bg-card p-10 overflow-y-auto max-h-[90vh]">
@@ -190,7 +193,7 @@ export default function DoctorPrescriptions() {
                                           <Pill className="w-8 h-8 text-primary" />
                                         </div>
                                         <div>
-                                            <DialogTitle className="text-2xl font-black text-foreground tracking-tight">Standardized Prescription</DialogTitle>
+                                            <DialogTitle className="text-2xl font-black text-foreground tracking-tight">{existingPrescId ? "Medical Update" : "Standardized Prescription"}</DialogTitle>
                                             <DialogDescription className="text-muted-foreground font-medium text-sm">
                                               Case Ref: {appt._id.slice(-8).toUpperCase()} - Patient: {appt.patientId?.fullName}
                                             </DialogDescription>
@@ -238,7 +241,7 @@ export default function DoctorPrescriptions() {
                                         disabled={prescribeMutation.isPending || medicines.some(m => !m.name || m.name.toLowerCase() === 'none')}
                                         className="w-full h-16 rounded-2xl bg-primary text-white hover:bg-primary/90 transition-all font-black text-base shadow-2xl shadow-primary/20"
                                       >
-                                        {prescribeMutation.isPending ? "Validating & Transmitting..." : "Generate Prescription & Commit Records"}
+                                        {prescribeMutation.isPending ? "Validating & Transmitting..." : existingPrescId ? "Commit Changes & Update Records" : "Generate Prescription & Commit Records"}
                                       </Button>
                                     </DialogFooter>
                                   </DialogContent>

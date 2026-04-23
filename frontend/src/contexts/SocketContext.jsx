@@ -49,6 +49,10 @@ export function SocketProvider({ children }) {
         } else if (data.type === 'vitals') {
           queryClient.invalidateQueries({ queryKey: ['me'] });
           queryClient.invalidateQueries({ queryKey: ['patient-data', data.patientId] });
+        } else if (data.type === 'prescriptions') {
+          queryClient.invalidateQueries({ queryKey: ['patient-prescriptions'] });
+          queryClient.invalidateQueries({ queryKey: ['doctor-prescriptions'] });
+          queryClient.invalidateQueries({ queryKey: ['patient-all-appointments'] });
         }
       });
 

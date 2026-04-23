@@ -81,22 +81,22 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
             >
-              <Card className="border-none shadow-2xl shadow-primary/5 rounded-[2.5rem] bg-card group hover:scale-[1.02] transition-transform cursor-default">
+              <Card className="border-none shadow-2xl shadow-primary/5 rounded-[2.5rem] bg-card group hover:scale-[1.02] transition-transform cursor-default overflow-hidden">
                 <CardContent className="p-8">
                   <div className="flex items-start justify-between">
-                    <div className={`p-4 rounded-2xl ${m.color} text-white shadow-lg shadow-primary/10`}>
+                    <div className={`p-4 rounded-2xl ${m.color} text-white shadow-lg shadow-primary/10 flex-shrink-0`}>
                       {m.icon}
                     </div>
                     {m.trend && (
-                      <Badge variant="outline" className={`border-none ${m.positive ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-600"} font-black text-[10px]`}>
+                      <Badge variant="outline" className={`border-none ${m.positive ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-600"} font-black text-[10px] ml-2`}>
                         {m.positive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
                         {m.trend}
                       </Badge>
                     )}
                   </div>
                   <div className="mt-6">
-                    <p className="text-[11px] font-black uppercase text-foreground/80 tracking-widest">{m.label}</p>
-                    <h3 className="text-3xl font-black text-foreground mt-1">{m.value}</h3>
+                    <p className="text-[11px] font-black uppercase text-foreground/80 tracking-widest truncate">{m.label}</p>
+                    <h3 className="text-2xl lg:text-3xl font-black text-foreground mt-1 break-words leading-tight">{m.value}</h3>
                   </div>
                 </CardContent>
               </Card>
@@ -140,10 +140,10 @@ export default function AdminDashboard() {
                          </div>
                          <Badge 
                            className={`h-10 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] border-none shadow-sm ${
-                             a.status === "approved" ? "bg-emerald-500 text-white" :
-                             a.status === "completed" ? "bg-green-400 text-white" :
-                             a.status === "rejected" ? "bg-destructive text-white" :
-                             "bg-amber-500 text-white"
+                             a.status === "completed" ? "bg-green-500 text-white" :
+                             a.status === "pending" ? "bg-orange-500 text-white" :
+                             a.status === "rejected" ? "bg-red-500 text-white" :
+                             "bg-primary text-white"
                            }`}
                          >
                            {a.status}

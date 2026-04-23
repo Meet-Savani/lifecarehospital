@@ -15,7 +15,7 @@ import {
 import { motion } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6']; // Green(Comp), Orange(Pend), Red(Rej), Blue, Purple
 
 export default function AdminAnalytics() {
   const { isDarkMode } = useTheme();

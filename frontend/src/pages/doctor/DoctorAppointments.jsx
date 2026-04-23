@@ -154,11 +154,12 @@ export default function DoctorAppointments() {
                     </td>
                     <td className="p-4">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-widest uppercase ${
-                        a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
+                        a.status === "completed" ? "bg-green-500/10 text-green-600" :
+                        a.status === "pending" ? "bg-orange-500/10 text-orange-600" :
                         a.status === "rejected" ? "bg-red-500/10 text-red-600" :
-                        a.status === "completed" ? "bg-green-400/10 text-green-600" :
+                        a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
                         a.status === "pending_reschedule" ? "bg-violet-500/10 text-violet-600" :
-                        "bg-amber-500/10 text-amber-600"
+                        "bg-blue-500/10 text-blue-600"
                       }`}>
                         {a.status === "pending_reschedule" ? "RESCHEDULE REQUEST" : a.status}
                       </span>

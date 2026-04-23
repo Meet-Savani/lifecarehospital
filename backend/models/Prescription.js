@@ -14,7 +14,8 @@ const prescriptionSchema = new mongoose.Schema({
     },
     duration: { type: String, default: '' },
     mealTiming: { type: String, enum: ['Before Meal', 'After Meal'], required: true },
-    description: { type: String, default: '' }
+    description: { type: String, default: '' },
+    isAdded: { type: Boolean, default: false }
   }],
   generalNotes: { type: String },
   createdAt: { type: Date, default: Date.now }

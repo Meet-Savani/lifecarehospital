@@ -41,6 +41,13 @@ export const createPrescription = async (req, res) => {
       appointment.isPrescriptionVisible = true;
     }
     await appointment.save();
+    
+    // Real-time Update
+    try {
+      const { getIO } = await import('../socket.js');
+      const io = getIO();
+      io.emit('data_updated', { type: 'prescriptions', patientId: appointment.patientId._id, appointmentId });
+    } catch (sErr) {}
 
     res.status(201).json(prescription);
   } catch (error) {
@@ -84,6 +91,30 @@ export const getPatientPrescriptions = async (req, res) => {
       })
       .sort({ createdAt: -1 });
     res.json(prescriptions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updatePrescription = async (req, res) => {
+  try {
+    const { medicines, generalNotes } = req.body;
+    const prescription = await Prescription.findById(req.params.id);
+    if (!prescription) return res.status(404).json({ message: 'Prescription not found' });
+
+    prescription.medicines = medicines;
+    if (generalNotes !== undefined) prescription.generalNotes = generalNotes;
+    
+    await prescription.save();
+
+    // Real-time Update
+    try {
+      const { getIO } = await import('../socket.js');
+      const io = getIO();
+      io.emit('data_updated', { type: 'prescriptions', patientId: prescription.patientId, appointmentId: prescription.appointmentId });
+    } catch (sErr) {}
+
+    res.json(prescription);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

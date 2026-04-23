@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useCallback } from "react";
-import GlobalCallOverlay from "../chat/GlobalCallOverlay";
 import Logo from "../../assets/Logo.png";
 import api from "@/services/api";
 
@@ -62,7 +61,6 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
   const navigate = useNavigate();
   const navRef = useRef(null);
 
-  // Restore sidebar scroll position on mount
   useEffect(() => {
     const saved = sessionStorage.getItem('sidebar-scroll');
     if (saved && navRef.current) {
@@ -70,7 +68,6 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
     }
   }, []);
 
-  // Save scroll position on scroll
   const handleNavScroll = useCallback(() => {
     if (navRef.current) {
       sessionStorage.setItem('sidebar-scroll', String(navRef.current.scrollTop));
@@ -79,7 +76,6 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Logo */}
       <div className={cn(
         "p-6 border-b border-border flex items-center justify-between transition-all duration-300",
         collapsed && "px-4 justify-center"
@@ -109,7 +105,6 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
         )}
       </div>
 
-      {/* Nav */}
       <nav ref={navRef} onScroll={handleNavScroll} className="flex-1 p-4 space-y-1.5 overflow-y-auto scrollbar-hide">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -150,7 +145,6 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
         })}
       </nav>
 
-      {/* Footer */}
       <div className={cn("p-4 border-t border-border mt-auto space-y-3", collapsed && "px-2")}>
         <div className={cn(
           "flex items-center justify-between p-3 rounded-2xl bg-muted/80 dark:bg-muted border border-border transition-all",
@@ -189,8 +183,6 @@ function SidebarContent({ navItems, user, role, unreadCount, unreadChatCount, on
   );
 }
 
-
-
 export default function DashboardLayout({ children, role }) {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -208,14 +200,12 @@ export default function DashboardLayout({ children, role }) {
   const location = useLocation();
   const mainRef = useRef(null);
 
-  // Scroll to top on navigation
   useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [location.pathname]);
 
-  // Fetch unread chats count (unique senders)
   useEffect(() => {
     const fetchUnreadChats = async () => {
       if (!user) return;
@@ -230,25 +220,21 @@ export default function DashboardLayout({ children, role }) {
     };
 
     fetchUnreadChats();
-    const interval = setInterval(fetchUnreadChats, 30000); // Check every 30s
+    const interval = setInterval(fetchUnreadChats, 30000);
     return () => clearInterval(interval);
   }, [user]);
 
-  // Try to use notifications context safely
   let unreadCount = 0;
   try {
     const notifCtx = useNotifications();
     unreadCount = notifCtx.unreadCount;
   } catch (e) {
-    // Not wrapped in NotificationProvider (admin role), ignore
   }
 
   const navItems = role === "admin" ? adminNav : role === "doctor" ? doctorNav : patientNav;
 
   return (
     <div className="flex h-screen bg-background text-foreground transition-colors duration-300 overflow-hidden font-medium">
-      <GlobalCallOverlay />
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
@@ -256,13 +242,11 @@ export default function DashboardLayout({ children, role }) {
         />
       )}
 
-      {/* Sidebar */}
       <aside className={cn(
         "fixed md:static inset-y-0 left-0 z-50 bg-card border-r border-border flex flex-col transition-all duration-300 shadow-xl md:shadow-none",
         isCollapsed ? "w-20 md:w-20" : "w-[80%] max-w-sm md:w-64",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
-        {/* Toggle Button for Desktop */}
         <button
           onClick={toggleCollapsed}
           className="hidden md:flex absolute -right-4 top-10 w-8 h-8 rounded-full bg-card border border-border items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all z-50"
@@ -281,9 +265,7 @@ export default function DashboardLayout({ children, role }) {
         />
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Mobile Top Bar */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-card border-b border-border flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -297,7 +279,6 @@ export default function DashboardLayout({ children, role }) {
           <ThemeToggle />
         </div>
 
-        {/* Scrollable Page Content */}
         <main ref={mainRef} className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 space-y-8 custom-scrollbar scroll-smooth">
           {children}
         </main>

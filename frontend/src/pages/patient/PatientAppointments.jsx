@@ -187,16 +187,16 @@ export default function PatientAppointments() {
                         </td>
                         <td className="p-4">
                           <span className={`inline-block text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold ${
-                            a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
+                            a.status === "completed" ? "bg-green-500/10 text-green-600" :
+                            a.status === "pending" ? "bg-orange-500/10 text-orange-600" :
                             a.status === "rejected" ? "bg-red-500/10 text-red-600" :
-                            a.status === "completed" ? "bg-green-400/10 text-green-600" :
-                            "bg-amber-500/10 text-amber-600"
+                            "bg-blue-500/10 text-blue-600"
                           }`}>
                             {a.status === "pending_reschedule" ? "PENDING RESCHEDULE" : a.status}
                           </span>
                         </td>
                         <td className="p-4">
-                          {(a.status === 'pending' || a.status === 'approved' || a.status === 'rejected') ? (
+                          {(a.status === 'pending' || a.status === 'approved') ? (
                             <Button 
                               size="sm" 
                               variant="outline" 
@@ -217,6 +217,8 @@ export default function PatientAppointments() {
                             <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600">
                               Paid
                             </span>
+                          ) : a.status === 'rejected' ? (
+                            <span className="text-xs text-muted-foreground">Locked</span>
                           ) : (
                             <Link to={`/patient/payment/${a._id}`} className="flex-shrink-0">
                               <span className="text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-warning/10 text-warning hover:bg-warning/20 transition-colors cursor-pointer border border-warning/20 whitespace-nowrap inline-block">

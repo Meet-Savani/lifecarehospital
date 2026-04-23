@@ -3,12 +3,14 @@ import { protect, authorize } from '../middleware/auth.js';
 import { 
   createPrescription, 
   getPrescriptions,
-  getPatientPrescriptions
+  getPatientPrescriptions,
+  updatePrescription
 } from '../controllers/prescriptionController.js';
 
 const router = express.Router();
 
 router.post('/', protect, authorize('doctor'), createPrescription);
+router.put('/:id', protect, authorize('doctor'), updatePrescription);
 router.get('/', protect, getPrescriptions);
 router.get('/patient/:patientId', protect, authorize('doctor', 'admin'), getPatientPrescriptions);
 
