@@ -38,7 +38,7 @@ export default function AdminAnalytics() {
   }
 
   const gridColor = isDarkMode ? '#334155' : '#f1f5f9';
-  const labelColor = isDarkMode ? '#94a3b8' : '#64748b';
+  const labelColor = isDarkMode ? '#f1f5f9' : '#64748b'; // Brighter in dark mode (slate-50)
 
   return (
     <DashboardLayout role="admin">
@@ -156,8 +156,10 @@ export default function AdminAnalytics() {
                       borderRadius: '20px', 
                       border: '1px solid ' + gridColor, 
                       backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)' 
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                      color: isDarkMode ? '#f1f5f9' : '#1e293b'
                     }}
+                    itemStyle={{ color: isDarkMode ? '#f1f5f9' : '#1e293b', fontWeight: 700 }}
                   />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11, fontWeight: 700, color: labelColor }}/>
                 </PieChart>
