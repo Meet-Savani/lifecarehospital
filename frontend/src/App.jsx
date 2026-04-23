@@ -20,6 +20,9 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { SocketProvider } from "@/contexts/SocketContext";
+import { CallProvider } from "@/contexts/CallContext";
+import IncomingCall from "@/components/calling/IncomingCall";
+import CallInterface from "@/components/calling/CallInterface";
 
 const Index = lazy(() => import("./pages/Index"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
@@ -147,11 +150,6 @@ function AuthWrappedApp() {
 }
 
 import ScrollToTop from "./components/layout/ScrollToTop";
-
-import { SocketProvider } from "@/contexts/SocketContext";
-import { CallProvider } from "@/contexts/CallContext";
-import IncomingCall from "@/components/calling/IncomingCall";
-import CallInterface from "@/components/calling/CallInterface";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
